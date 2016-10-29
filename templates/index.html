@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="container">
+    <div class="row">
+        <div class="jumbotron">
+            {% if user.is_authenticated %}
+                <h1>Vitaj {{ user.get_username }}</h1>
+            {% else %}
+                <h1>Vitaj</h1>
+                <p>Pre vyuzitie funkcionalit stranky sa skus prihlasit</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
