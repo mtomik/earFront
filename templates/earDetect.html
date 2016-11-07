@@ -6,7 +6,18 @@
     <div class="row">
         <div class="jumbotron">
             <h1>Detektor Ucha</h1>
-            <p>TODO : //</p>
+
+            <form action="{%  url "detect" %}" method="post" enctype="multipart/form-data">
+                {%  csrf_token %}
+                <p>
+                    <input id="image" type="file" name="image">
+                </p>
+
+            <p><input type="submit" value="Upload"/></p>
+
+            </form>
+            <img src="{{ image }}">
+
         </div>
     </div>
 </div>
