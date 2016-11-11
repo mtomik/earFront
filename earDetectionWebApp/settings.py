@@ -129,7 +129,10 @@ LOGIN_REDIRECT_URL = '/earTrainer/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static"),
-                     '/home/tomik/git/earFront/static/')
+                     os.path.join(STATIC_ROOT, 'css/'),
+                     os.path.join(STATIC_ROOT, 'javascript/'),
+                     os.path.join(STATIC_ROOT, 'images/')
+                    )
 
 # For storing images loaded by users
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
