@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'j@fw^tl-_@s5@2ii6s4!^5qz^jz@#%d*h#$=75npa&1ebv1=p%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['147.175.106.116']
 
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
     'earTrainer',
     'earDetector'
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'earDetectionWebApp.urls'
@@ -112,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Bratislava'
 
 USE_I18N = True
 
@@ -128,15 +130,18 @@ LOGIN_REDIRECT_URL = '/earTrainer/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static"),
-                     os.path.join(STATIC_ROOT, 'css/'),
-                     os.path.join(STATIC_ROOT, 'javascript/'),
-                     os.path.join(STATIC_ROOT, 'images/')
-                    )
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+# STATICFILES_DIRS = ( os.path.join(BASE_DIR, "static/"),
+#                      os.path.join(STATIC_ROOT, 'css/'),
+#                      os.path.join(STATIC_ROOT, 'javascript/'),
+#                      os.path.join(STATIC_ROOT, 'images/')
+#                     )
 
 # For storing images loaded by users
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media/")
+MEDIA_URL = 'media/'
 
 FILE_UPLOAD_TEMP_DIR = os.path.join(BASE_DIR,"media")
 

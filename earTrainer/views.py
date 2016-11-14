@@ -6,7 +6,7 @@ from django.http import HttpResponse
 
 @login_required(login_url="../login/")
 def home(request):
-    return render(request,"home.html")
+    return render(request, "earTrainer.html")
 
 
 @login_required
