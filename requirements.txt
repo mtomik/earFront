@@ -1,0 +1,6 @@
+Django
+celery
+whitenoise
+cython
+numpy
+Pillow
