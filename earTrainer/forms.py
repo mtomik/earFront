@@ -8,3 +8,8 @@ class LoginForm(AuthenticationForm):
                                widget=forms.TextInput(attrs={'class': 'form-control', 'name': 'username'}))
     password = forms.CharField(label="Password", max_length=30,
                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'name': 'password'}))
+
+class TrainerParams(forms.Form):
+    first_param = forms.CharField(label='param1', max_length=100)
+
+    second_param = forms.CharField(label='param2', max_length=100)

@@ -23,6 +23,9 @@ from django.contrib.auth import views
 from  earTrainer.forms import LoginForm
 from django.conf.urls.static import static
 from django.conf import settings
+from rest_framework import routers
+
+
 
 urlpatterns = [
     url(r'', include('main.urls')),
@@ -31,8 +34,7 @@ urlpatterns = [
     url(r'^earDetector/', include('earDetector.urls')),
     url(r'^login/$', views.login, {'template_name': 'login.html', 'authentication_form': LoginForm}, name='login'),
     url(r'^logout/$', views.logout, {'next_page': '/login'}),
-
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+ ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG is True:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

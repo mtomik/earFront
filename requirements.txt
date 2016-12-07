@@ -4,3 +4,6 @@ whitenoise
 cython
 numpy
 Pillow
+djangorestframework
+markdown
+django-filter

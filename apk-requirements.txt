@@ -8,6 +8,7 @@ tiff-dev
 libwebp-dev
 make
 cmake
+gcc
 g++
 unzip
 jasper-dev
@@ -18,3 +19,4 @@ clang
 linux-headers
 musl-dev
 build-base
+gtk+2.0

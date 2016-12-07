@@ -1,0 +1,92 @@
+FROM alpine:3.4
+
+MAINTAINER Martin Tomik <mtomik@live.com>
+
+# Ref: https://github.com/frol/docker-alpine-glibc
+RUN ALPINE_GLIBC_BASE_URL="https://github.com/andyshinn/alpine-pkg-glibc/releases/download" && \
+    ALPINE_GLIBC_PACKAGE_VERSION="2.23-r1" && \
+    ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
+    apk add --no-cache --virtual=build-dependencies wget ca-certificates && \
+    wget \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+    apk add --no-cache --allow-untrusted \
+        "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME" && \
+    \
+    /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
+    echo "export LANG=C.UTF-8" > /etc/profile.d/locale.sh && \
+    \
+    apk del glibc-i18n && \
+    rm \
+        "$ALPINE_GLIBC_BASE_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_BIN_PACKAGE_FILENAME" \
+        "$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"
+
+
+
+# Miniconda + python packages
+COPY *.txt /
+RUN MINICONDA_FILENAME="Miniconda3-4.2.12-Linux-x86_64.sh" && \
+    MINICONDA_URL="https://repo.continuum.io/miniconda/$MINICONDA_FILENAME" && \
+    apk add --no-cache libstdc++ && \
+    apk add --no-cache --virtual=build-dependencies bash wget build-base musl-dev && \
+    wget -q --no-check-certificate $MINICONDA_URL && \
+    bash /$MINICONDA_FILENAME -b -p /opt/conda && \
+    /opt/conda/bin/conda install -y --file conda-requirements.txt && \
+    /opt/conda/bin/conda update -y --all && \
+    /opt/conda/bin/pip install -r requirements.txt
+
+# add apk dependencies
+RUN apk update && apk upgrade && apk add \
+   make cmake g++ unzip jasper-dev clang-dev clang linux-headers musl-dev build-base
+
+##5 defining compilers
+ENV CC /usr/bin/clang
+ENV CXX /usr/bin/clang++
+
+##6 opencv3
+RUN cd /opt && \
+  wget https://github.com/opencv/opencv/archive/3.1.0.zip && \
+  wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip && \
+  unzip 3.1.0.zip && \
+  unzip opencv_contrib.zip && \
+  cd /opt/opencv-3.1.0 && \
+  mkdir build && \
+  cd build && \
+  cmake \
+    -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D WITH_FFMPEG=NO \
+    -D WITH_IPP=NO  \
+    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.1.0/modules \
+    -D WITH_OPENEXR=NO .. && \
+     make  && \
+     make install
+
+
+# Clear pkgs
+RUN rm -rf /opt/conda/pkgs/*
+
+
+ENV PATH=/opt/conda/bin:$PATH \
+    LANG=C.UTF-8
+
+# clean unnecessary stuff ( opencv build / scripts / dependencies for compile )
+#rm /*.txt /requirements.installed
+RUN apk del cmake make unzip wget linux-headers clang-dev clang gsl
+
+# copy Django project
+RUN mkdir /code
+WORKDIR /code
+COPY . .
+
+# Clean APK cache
+RUN rm -rf /var/cache/apk/*
+
+EXPOSE 8000
+CMD ["python","manage.py","runserver","0.0.0.0:8000"]

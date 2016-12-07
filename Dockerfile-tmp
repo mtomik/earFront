@@ -1,0 +1,109 @@
+# 5MB linux image with python
+FROM jfloff/alpine:3.4-slim
+
+MAINTAINER Martin Tomik <mtomik@live.com>
+ENV PYTHONUNBUFFERED 1
+
+# add needed package list to root dir ( to be visible for entrypoint.sh )
+COPY *.txt /
+
+
+# alpine bug fix
+RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+
+RUN apk update && apk upgrade && apk add linux-headers curl
+
+ENV CONDA_DIR=/opt/conda CONDA_VER=latest
+ENV PATH=$CONDA_DIR/bin:$PATH SHELL=/bin/bash LANG=C.UTF-8
+
+
+#RUN apk --update  --repository http://dl-4.alpinelinux.org/alpine/edge/community add \
+#    bash \
+#    git \
+#    curl \
+#    ca-certificates \
+#    bzip2 \
+#    unzip \
+#    sudo \
+#    libstdc++ \
+#    clang-dev \
+#    clang \
+#    libxext \
+#    libxrender \
+#    tini \
+#    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-2.23-r1.apk" -o /tmp/glibc.apk \
+#    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-bin-2.23-r1.apk" -o /tmp/glibc-bin.apk \
+#    && curl -L "https://github.com/andyshinn/alpine-pkg-glibc/releases/download/2.23-r1/glibc-i18n-2.23-r1.apk" -o /tmp/glibc-i18n.apk \
+#    && apk add --allow-untrusted /tmp/glibc*.apk \
+#    && /usr/glibc-compat/sbin/ldconfig /lib /usr/glibc-compat/lib \
+#    && /usr/glibc-compat/bin/localedef -i en_US -f UTF-8 en_US.UTF-8 \
+#    && rm -rf /tmp/glibc*apk /var/cache/apk/
+
+# run loading dependencies
+#RUN /entrypoint.sh
+
+##5 defining compilers
+ENV CC /usr/bin/clang
+ENV CXX /usr/bin/clang++
+
+# Install miniconda to /miniconda
+RUN mkdir -p $CONDA_DIR && \
+    echo export PATH=$CONDA_DIR/bin:'$PATH' > /etc/profile.d/conda.sh && \
+    curl https://repo.continuum.io/miniconda/Miniconda3-${CONDA_VER}-Linux-x86_64.sh  -o mconda.sh && \
+    /bin/bash mconda.sh -f -b -p $CONDA_DIR && \
+    rm mconda.sh
+
+RUN conda install -y scikit-image scikit-learn
+RUN pip install --upgrade pip
+
+
+
+
+
+
+
+##6 opencv3
+#RUN mkdir /opt && cd /opt && \
+#  wget https://github.com/opencv/opencv/archive/3.1.0.zip && \
+#  wget -O opencv_contrib.zip https://github.com/Itseez/opencv_contrib/archive/3.1.0.zip && \
+#  unzip 3.1.0.zip && \
+#  unzip opencv_contrib.zip && \
+#  cd /opt/opencv-3.1.0 && \
+#  mkdir build && \
+#  cd build && \
+#  cmake \
+#    -D CMAKE_BUILD_TYPE=RELEASE \
+#    -D CMAKE_INSTALL_PREFIX=/usr/local \
+#    -D WITH_FFMPEG=NO \
+#    -D WITH_IPP=NO  \
+#    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.1.0/modules \
+#    -D WITH_OPENEXR=NO .. && \
+#     make  && \
+#     make install
+
+# clean unnecessary stuff ( opencv build / scripts / dependencies for compile )
+#rm /*.txt /requirements.installed
+RUN rm -rf /opt/* &&  \
+    apk del cmake make unzip wget linux-headers clang-dev clang gsl
+
+# move created opencv python lib to original place
+#RUN cd /usr/local/lib/python3.4/site-packages/ && \
+#    mv  cv2.cpython-34m.so /usr/lib/python3.4/site-packages/cv2.so
+
+RUN mkdir /code
+# set work dir to our code directory
+WORKDIR /code
+
+# copy project to the WORKDIR directory
+COPY . .
+
+RUN pip install opencv_python-3.1.0+contrib_opencl-cp35-cp35m-win_amd64.whl
+
+
+# Clean APK cache
+RUN rm -rf /var/cache/apk/*
+
+EXPOSE 8000
+# 0.0.0.0:8000 for exposing server
+# "-p 8000:8000"
+CMD ["python","manage.py","runserver","0.0.0.0:8000"]
