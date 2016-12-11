@@ -1,9 +1,9 @@
 version: '2'
 
 services:
-  # PostgreSQL database
+
   db:
-    image: postgres:9.4
+    image: postgres:latest
     hostname: db
     environment:
       - POSTGRES_USER=postgres
@@ -17,10 +17,13 @@ services:
     image: redis:2.8.19
     hostname: redis
 
+
   # RabbitMQ
   rabbit:
     hostname: rabbit
-    image: rabbitmq:3.6.0
+    build:
+      context: .
+      dockerfile: DockerfileMQ
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=mypass
@@ -34,9 +37,10 @@ services:
       context: .
       dockerfile: Dockerfile
     hostname: web
+    environment:
+      - PATH=/opt/conda/bin:/usr/bin:$PATH
+      - PYTHONUNBUFFERED=true
     command: ./run_web.sh
-    volumes:
-      - .:/app  # mount current directory inside container
     ports:
       - "8000:8000"
     # set up links so that web knows about db, rabbit and redis
@@ -52,9 +56,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
-    volumes:
-      - .:/app
+    ports:
+      - "5555:5555"
     links:
       - db
       - rabbit

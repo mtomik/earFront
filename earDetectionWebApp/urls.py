@@ -23,8 +23,6 @@ from django.contrib.auth import views
 from  earTrainer.forms import LoginForm
 from django.conf.urls.static import static
 from django.conf import settings
-from rest_framework import routers
-
 
 
 urlpatterns = [

@@ -1,5 +1,5 @@
 Django
-celery
+celery[redis]
 whitenoise
 cython
 numpy
@@ -7,3 +7,5 @@ Pillow
 djangorestframework
 markdown
 django-filter
+flower
+django-celery-results

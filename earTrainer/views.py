@@ -4,19 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from earTrainer.forms import TrainerParams
 from earTrainer.main.createSamples import CreateSamples
-from .serializers import JobSerializer
-from .models import Job
-from rest_framework import mixins, viewsets
+from earTrainer.tasks import add
 
-class JobViewSet(mixins.CreateModelMixin,
-                 mixins.ListModelMixin,
-                 mixins.RetrieveModelMixin,
-                 viewsets.GenericViewSet):
-    """
-    API endpoint that allows jobs to be viewed or created.
-    """
-    queryset = Job.objects.all()
-    serializer_class = JobSerializer
 
 @login_required(login_url="../login/")
 def home(request):
@@ -46,8 +35,9 @@ def test(request):
         print(form)
         if form.is_valid():
             print (request.POST.get('first_param'))
-            a = CreateSamples("test", 10, 0.3, 0.3, 1.0, 40, 20, 40)
-            a.start()
+            # a = CreateSamples("test", 10, 0.3, 0.3, 1.0, 40, 20, 40)
+            # a.start()
+            print(add.delay(10, 5))
 
 
             return render(request, 'earTrainer.html')

@@ -9,14 +9,15 @@ RUN apt-get update && apt-get -y upgrade && \
 COPY *.txt /
 RUN conda update -y --all && \
     conda install -y --file conda-requirements.txt && \
-    conda install -y -c menpo opencv3 && \
+    conda install -y -c menpo opencv3=3.1.0 && \
     pip install  -r requirements.txt
 
 # copy Django project
 RUN mkdir /code
 WORKDIR /code
 COPY . .
+RUN chmod +x run_celery.sh run_web.sh
 
-
-EXPOSE 8000
-CMD ["python","manage.py","runserver","0.0.0.0:8000"]
+RUN adduser --disabled-password --gecos '' myuser
+#EXPOSE 8000
+#CMD ["python","manage.py","runserver","0.0.0.0:8000"]
