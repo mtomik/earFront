@@ -14,6 +14,7 @@ class Utils:
     def run_command(cmd, path=None):
         if path is not None:
             os.chdir(path)
+        print('#Running command - ',cmd)
 
         p = Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
@@ -27,7 +28,6 @@ class PropertyUtils:
     def __init__(self):
         self.config = configparser.RawConfigParser()
         self.config.read(os.path.join(BASE_DIR,'properties/main_config.properties'))
-        print(self.config.get('main','workDirPath'))
 
     def get_all(self,name):
         print(dict(self.config.items(name)))

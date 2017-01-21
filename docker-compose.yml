@@ -2,6 +2,7 @@ version: '2'
 
 services:
 
+  # Postgres ( db for Django )
   db:
     image: postgres:latest
     hostname: db
@@ -10,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=postgres
     ports:
-      - "5432:5432"
+      - "5433:5433"
 
   # Redis
   redis:
@@ -28,8 +29,8 @@ services:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=mypass
     ports:
-      - "5672:5672"  # we forward this port because it's useful for debugging
-      - "15672:15672"  # here, we can access rabbitmq management plugin
+      - "5672:5672"  # debugging
+      - "15672:15672"  # rabbitmq management plugin
 
   # Django web server
   web:
@@ -43,7 +44,6 @@ services:
     command: ./run_web.sh
     ports:
       - "8000:8000"
-    # set up links so that web knows about db, rabbit and redis
     links:
       - db
       - rabbit
@@ -59,6 +59,8 @@ services:
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
+    volumes:
+      - E:/Ear_detection:/ear_detection
     ports:
       - "5555:5555"
     links:

@@ -4,13 +4,21 @@ from earDetectionWebApp.settings import BASE_DIR
 from earTrainer.main.utils import Utils, PropertyUtils
 import os.path
 from shutil import copyfile
+from sys import platform
+import shutil
 
 
 class CreateSamples:
 
     def __init__(self, result_dir, sample_count, x_angle, y_angle, z_angle, i_dev, w, h):
         propUtil = PropertyUtils()
-        propsmain = propUtil.get_all('main')
+
+        # docker props
+        if platform == 'linux':
+            propsmain = propUtil.get_all('docker')
+        else:
+            propsmain = propUtil.get_all('main')
+
         propsenv = propUtil.get_all('env')
 
 
@@ -42,15 +50,13 @@ class CreateSamples:
             print('Creating negatives.dat')
             self.create_dat(self, 'negatives')
 
-        print('Running create samples script!')
-        cmd = 'perl %s %s %s %s %i \"opencv_createsamples.exe -bgcolor 0 -bgthresh 0 -maxxangle %.1f -maxyangle %.1f -maxzangle %.1f -maxidev %i -w %i -h %i \"' \
-              % (self.perlScript, self.positiveDat,self.negativeDat,
-                 self.resultDir, self.sampleCount, self.xAngle, self.yAngle, self.zAngle, self.iDev, self.w, self.h)
-        # creates samples on desired destination
-        Utils.run_command(cmd)
+
+        # run positive sample creator
+        self.create_pos_samples(self)
 
         # merge created positive samples to single VEC
         self.run_merge_vec()
+        print('Creating samples done!')
 
     def test(self):
         cmd = 'ls -al'
@@ -58,6 +64,22 @@ class CreateSamples:
         out, err = p.communicate()
         print("Return code: ", p.returncode)
         print(out.rstrip(), err.rstrip())
+
+    @staticmethod
+    def create_pos_samples(self,):
+        print('Running create samples script!')
+        shutil.rmtree(self.resultDir)
+        opencv_sampler = 'opencv_createsamples.exe'
+
+        if platform == 'linux':
+            opencv_sampler = opencv_sampler[:-4]
+
+        cmd = 'perl %s %s %s %s %i \"%s -bgcolor 0 -bgthresh 0 -maxxangle %.1f -maxyangle %.1f -maxzangle %.1f -maxidev %i -w %i -h %i \"' \
+              % (self.perlScript, self.positiveDat, self.negativeDat,
+                 self.resultDir, self.sampleCount, opencv_sampler, self.xAngle, self.yAngle, self.zAngle, self.iDev,
+                 self.w, self.h)
+        # creates samples on desired destination
+        Utils.run_command(cmd)
 
     @staticmethod
     def create_dat(self, folder):

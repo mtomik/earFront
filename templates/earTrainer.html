@@ -7,6 +7,9 @@
         <div class="jumbotron">
             <h1>Trenovanie klasifikatora</h1>
             <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Nove trenovanie</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#samples">Vytvorit vzorky</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#trainer">Spustit trenovanie</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#tester">Otestuj</button>
 
             <!-- Modal -->
           <div class="modal fade" id="myModal" role="dialog">
@@ -29,6 +32,97 @@
                           <label for="second_param" class="form-control-label">Second:</label>
                           <input type="text" name="second_param" class="form-control" id="second_param">
                       </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>
+                    <button type="submit" class="btn btn-primary" >Start</button>
+                </div>
+              </div>
+                  </form>
+
+            </div>
+          </div>
+
+
+              <!-- Modal -->
+          <div class="modal fade" id="samples" role="dialog">
+            <div class="modal-dialog">
+                  <form action="{% url "samples"  %} " method="post">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Vytvorit pozitivne vzorky</h4>
+                </div>
+                <div class="modal-body">
+                      {% csrf_token %}
+                      <div class="form-group">
+                          <label for="positive_samples" class="form-control-label">Pocet pozitivnych vzoriek:</label>
+                          <input type="text" name="positive_samples" class="form-control" id="positive_samples">
+                      </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>
+                    <button type="submit" class="btn btn-primary" >Start</button>
+                </div>
+              </div>
+                  </form>
+
+            </div>
+          </div>
+
+                 <!-- Modal -->
+          <div class="modal fade" id="trainer" role="dialog">
+            <div class="modal-dialog">
+                  <form action="{% url "trainer"  %} " method="post">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Spustenie trenovania</h4>
+                </div>
+                <div class="modal-body">
+                      {% csrf_token %}
+                      <div class="form-group">
+                          <label for="first_param" class="form-control-label">First:</label>
+                          <input type="text" name="first_param" class="form-control" id="first_param">
+                      </div>
+                      <div class="form-group">
+                          <label for="second_param" class="form-control-label">Second:</label>
+                          <input type="text" name="second_param" class="form-control" id="second_param">
+                      </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>
+                    <button type="submit" class="btn btn-primary" >Start</button>
+                </div>
+              </div>
+                  </form>
+
+            </div>
+          </div>
+
+                    <!-- Modal -->
+          <div class="modal fade" id="tester" role="dialog">
+            <div class="modal-dialog">
+                  <form action="{% url "tester"  %} " method="post">
+
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Spustenie testovania</h4>
+                </div>
+                <div class="modal-body">
+                      {% csrf_token %}
+                      <div class="form-group">
+                          <label for="xml_file" class="form-control-label">XML File to test:</label>
+                          <input type="text" name="xml_file" class="form-control" id="xml_file">
+                      </div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>

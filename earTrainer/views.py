@@ -2,10 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from earTrainer.forms import TrainerParams
-from earTrainer.main.createSamples import CreateSamples
-from earTrainer.tasks import add
-
+from earTrainer.forms import TrainerParams, CreateSamplesForm
+from earTrainer.tasks import add, create_samples, start_training, start_testing
 
 @login_required(login_url="../login/")
 def home(request):
@@ -45,6 +43,35 @@ def test(request):
         form = TrainerParams()
 
     return render(request, 'earTrainer.html', { 'form': form})
+
+@login_required(login_url="../login/")
+def create_sample_call(request):
+    if request.method == 'POST':
+        form = CreateSamplesForm(request.POST)
+        if form.is_valid():
+            pos_samples = int(request.POST.get('positive_samples'))
+            # spusti vytvaranie samplov
+            create_samples.delay(pos_samples)
+    return render(request, 'earTrainer.html')
+
+
+@login_required(login_url="../login/")
+def start_training_call(request):
+    if request.method == 'POST':
+        start_training.delay()
+    return render(request, 'earTrainer.html')
+
+@login_required(login_url="../login/")
+def start_testing_call(request):
+    if request.method == 'POST':
+        xml_file = request.POST.get('xml_file')
+        start_testing.delay(xml_file)
+    return render(request, 'earTrainer.html')
+
+
+
+
+
 
 
 

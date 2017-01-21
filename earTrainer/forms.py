@@ -13,3 +13,6 @@ class TrainerParams(forms.Form):
     first_param = forms.CharField(label='param1', max_length=100)
 
     second_param = forms.CharField(label='param2', max_length=100)
+
+class CreateSamplesForm(forms.Form):
+    positive_samples = forms.IntegerField(label='pos_samples', max_value=100000, min_value=10)
