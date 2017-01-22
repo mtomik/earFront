@@ -1,0 +1,46 @@
+# Debian 8.5 with miniconda and python3.5
+FROM show0k/miniconda-armv7
+
+MAINTAINER Martin Tomik <mtomik@live.com>
+
+#########################
+### Prepare conda
+RUN bash miniconda.sh -b -p /opt/conda && \
+    rm miniconda.sh && \
+    export PATH=/opt/conda/bin:$PATH && \
+    conda config --set show_channel_urls True && \
+    conda config --add channels conda-forge && \
+    conda config --add channels poppy-project && \
+    conda update --all --yes && \
+    conda install conda-build && \
+    conda install anaconda-client && \
+	conda clean -tipy
+
+ENV PATH /opt/conda/bin:$PATH
+
+RUN export PATH="/opt/conda/bin:${PATH}" && \
+    conda install --yes jinja2 && \
+    conda config --set anaconda_upload yes && \
+    conda config --set use_pip false && conda config --set show_channel_urls true && \
+    conda clean -tipsy
+
+###########################################
+
+RUN apt-get update && apt-get -y upgrade && \
+    apt-get install -y --fix-missing libgtk2.0-dev
+
+COPY *.txt /
+RUN conda update -y --all && \
+    conda install -y --file conda-requirements.txt && \
+    conda install -y -c menpo opencv3=3.1.0 && \
+    pip install  -r requirements.txt
+
+# copy Django project
+RUN mkdir /code
+WORKDIR /code
+COPY . .
+RUN chmod +x run_celery.sh run_web.sh
+
+RUN adduser --disabled-password --gecos '' myuser
+#EXPOSE 8000
+#CMD ["python","manage.py","runserver","0.0.0.0:8000"]
