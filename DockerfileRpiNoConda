@@ -1,0 +1,74 @@
+# Debian 8.5 with miniconda and python3.5
+FROM resin/rpi-raspbian:wheezy
+
+MAINTAINER Martin Tomik <mtomik@live.com>
+
+
+RUN apt-get update && apt-get -y upgrade && \
+    apt-get install -y libgtk2.0-dev build-essential cmake cmake-curses-gui pkg-config \
+    libatlas-base-dev gfortran \
+    libjpeg-dev libjasper-dev libpng12-dev \
+    libpng3 libpnglite-dev zlib1g-dbg zlib1g zlib1g-dev \
+    libunicap2 libunicap2-dev swig libv4l-0 libv4l-dev \
+    python2.7-dev python3-dev wget unzip libpq-dev
+
+# virtualenv
+RUN wget https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && pip install virtualenv virtualenvwrapper && \
+    rm -rf ~/.cache/pip
+
+# profile update
+RUN echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.profile && \
+    echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile && \
+    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile && \
+    source ~/.profile
+
+# pick python3 + numpy
+RUN mkvirtualenv cv -p python3 && workon cv && \
+    pip install numpy
+
+##6 opencv3
+RUN cd /opt && \
+  wget https://github.com/opencv/opencv/archive/3.2.0.zip && \
+  wget -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/3.2.0.zip && \
+  unzip 3.2.0.zip && \
+  unzip opencv_contrib.zip && \
+  cd /opt/opencv-3.2.0 && \
+  mkdir build && \
+  cd build && \
+  cmake \
+    -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D BUILD_NEW_PYTHON_SUPPORT=ON \
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D WITH_FFMPEG=NO \
+    -D WITH_IPP=NO  \
+    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules \
+    -D WITH_OPENEXR=NO .. && \
+     make -j4 && \
+     make install && \
+     ldconfig && \
+     rm /opt/3.2.0.zip && \
+     rm /opt/opencv_contrib.zip
+
+# fix opencv python
+RUN cd /usr/local/lib/python3.4/site-packages/ && mv cv2.cpython-34m.so cv2.so && \
+    cd ~/.virtualenvs/cv/lib/python3.4/site-packages/ && \
+    ln -s /usr/local/lib/python3.4/site-packages/cv2.so cv2.so
+
+# install dependencies
+RUN pip install -r requirements.txt
+
+
+
+COPY *.txt /
+
+# copy Django project
+RUN mkdir /code
+WORKDIR /code
+COPY . .
+RUN chmod +x run_celery.sh run_web.sh
+
+RUN adduser --disabled-password --gecos '' myuser
+#EXPOSE 8000
+#CMD ["python","manage.py","runserver","0.0.0.0:8000"]
