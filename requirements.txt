@@ -9,4 +9,4 @@ markdown
 django-filter
 flower
 django-celery-results
-python-psycopg2
+psycopg2

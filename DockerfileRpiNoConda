@@ -1,5 +1,5 @@
 # Debian 8.5 with miniconda and python3.5
-FROM resin/rpi-raspbian:wheezy
+FROM resin/rpi-raspbian:jessie
 
 MAINTAINER Martin Tomik <mtomik@live.com>
 
@@ -17,7 +17,7 @@ RUN apt-get update && apt-get -y upgrade && \
     wget unzip libpq-dev
 
 # remove python2.7
-RUN apt-get remove -y python2.7 python2.7-dev && apt-get autoremove
+#RUN apt-get remove -y python2.7 python2.7-dev && apt-get autoremove
 
 # alternative
 #RUN  apt-get update && apt-get -y upgrade && \
@@ -70,6 +70,8 @@ RUN cd /opt && \
 #    cd ~/.virtualenvs/cv/lib/python3.4/site-packages/ && \
 #    ln -s /usr/local/lib/python3.4/site-packages/cv2.so cv2.so
 
+# fix opencv python
+RUN cd /usr/local/lib/python3.4/dist-packages/ && mv cv2.cpython-34m.so cv2.so
 # install dependencies
 RUN pip3 install -r requirements.txt
 
