@@ -4,7 +4,7 @@ FROM resin/rpi-raspbian:wheezy
 MAINTAINER Martin Tomik <mtomik@live.com>
 
 # fix - source not found
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+#RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y libgtk2.0-dev build-essential cmake cmake-curses-gui pkg-config \
@@ -22,12 +22,10 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 # profile update
 RUN echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.profile && \
     echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile && \
-    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile && \
-    source ~/.profile
+    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile
 
 # pick python3 + numpy
-RUN mkvirtualenv cv -p python3 && workon cv && \
-    pip install numpy
+RUN /bin/bash -c 'source ~/.profile; mkvirtualenv cv -p python3 ; workon cv; pip install numpy'
 
 ##6 opencv3
 RUN cd /opt && \
@@ -37,19 +35,9 @@ RUN cd /opt && \
   unzip opencv_contrib.zip && \
   cd /opt/opencv-3.2.0 && \
   mkdir build && \
-  cd build && \
-  cmake \
-    -D CMAKE_BUILD_TYPE=RELEASE \
-    -D CMAKE_INSTALL_PREFIX=/usr/local \
-    -D BUILD_NEW_PYTHON_SUPPORT=ON \
-    -D INSTALL_PYTHON_EXAMPLES=ON \
-    -D WITH_FFMPEG=NO \
-    -D WITH_IPP=NO  \
-    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules \
-    -D WITH_OPENEXR=NO .. && \
-     make -j4 && \
-     make install && \
-     ldconfig && \
+  cd build
+
+RUN /bin/bash -c 'workon cv;  cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_NEW_PYTHON_SUPPORT=ON -D INSTALL_PYTHON_EXAMPLES=ON -D WITH_FFMPEG=NO -D WITH_IPP=NO -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules -D WITH_OPENEXR=NO ..; make -j4; make install; ldconfig' && \
      rm /opt/3.2.0.zip && \
      rm /opt/opencv_contrib.zip
 
