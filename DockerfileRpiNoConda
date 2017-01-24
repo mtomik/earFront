@@ -40,6 +40,7 @@ RUN apt-get remove -y python2.7 python2.7-dev && apt-get autoremove
 
 # pick python3 + numpy
 #RUN /bin/bash -c 'source ~/.profile; mkvirtualenv cv -p python3 ; workon cv; pip install numpy'
+RUN pip3 install numpy
 
 ##6 opencv3
 RUN cd /opt && \
@@ -53,10 +54,10 @@ RUN cd /opt && \
   cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D CMAKE_INSTALL_PREFIX=/usr/local \
     -D BUILD_NEW_PYTHON_SUPPORT=ON \
-    -D INSTALL_PYTHON_EXAMPLES=ON
-    -D WITH_FFMPEG=NO
-    -D WITH_IPP=NO
-    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules
+    -D INSTALL_PYTHON_EXAMPLES=ON \
+    -D WITH_FFMPEG=NO \
+    -D WITH_IPP=NO \
+    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules \
     -D WITH_OPENEXR=NO .. && \
   make -j4 && \
   make install && \
