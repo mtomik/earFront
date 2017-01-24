@@ -3,6 +3,8 @@ FROM resin/rpi-raspbian:wheezy
 
 MAINTAINER Martin Tomik <mtomik@live.com>
 
+# fix - source not found
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y libgtk2.0-dev build-essential cmake cmake-curses-gui pkg-config \

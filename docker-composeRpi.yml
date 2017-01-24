@@ -60,7 +60,7 @@ services:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
     volumes:
-      - E:/Ear_detection:/ear_detection
+      - /home/pi/web/data:/ear_detection
     ports:
       - "5555:5555"
     links:
