@@ -5,6 +5,7 @@ MAINTAINER Martin Tomik <mtomik@live.com>
 
 # fix - source not found
 #RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+ENV PATH /usr/local/bin:$PATH
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y libgtk2.0-dev build-essential cmake cmake-curses-gui pkg-config \
@@ -12,20 +13,33 @@ RUN apt-get update && apt-get -y upgrade && \
     libjpeg-dev libjasper-dev libpng12-dev \
     libpng3 libpnglite-dev zlib1g-dbg zlib1g zlib1g-dev \
     libunicap2 libunicap2-dev swig libv4l-0 libv4l-dev \
-    python2.7-dev python3-dev wget unzip libpq-dev
+    python3 python3-dev python3-pip python3-virtualenv python3-wheel \
+    wget unzip libpq-dev
+
+# remove python2.7
+RUN apt-get remove -y python2.7 python2.7-dev && apt-get autoremove
+
+# alternative
+#RUN  apt-get update && apt-get -y upgrade && \
+#     wget unzip python3 python3-dev python3-pip python3-wheel
+
 
 # virtualenv
-RUN wget https://bootstrap.pypa.io/get-pip.py && \
-    python get-pip.py && pip install virtualenv virtualenvwrapper && \
-    rm -rf ~/.cache/pip
+#RUN wget https://bootstrap.pypa.io/get-pip.py && \
+#    python3.4 get-pip.py && pip install virtualenv virtualenvwrapper && \
+#    rm -rf ~/.cache/pip
+
+#RUN wget https://bootstrap.pypa.io/get-pip.py && \
+#    python3.4 get-pip.py && \
+#    rm -rf ~/.cache/pip
 
 # profile update
-RUN echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.profile && \
-    echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile && \
-    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile
+#RUN echo -e "\n# virtualenv and virtualenvwrapper" >> ~/.profile && \
+#    echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile && \
+#    echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.profile
 
 # pick python3 + numpy
-RUN /bin/bash -c 'source ~/.profile; mkvirtualenv cv -p python3 ; workon cv; pip install numpy'
+#RUN /bin/bash -c 'source ~/.profile; mkvirtualenv cv -p python3 ; workon cv; pip install numpy'
 
 ##6 opencv3
 RUN cd /opt && \
@@ -35,19 +49,28 @@ RUN cd /opt && \
   unzip opencv_contrib.zip && \
   cd /opt/opencv-3.2.0 && \
   mkdir build && \
-  cd build
-
-RUN /bin/bash -c 'workon cv;  cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D BUILD_NEW_PYTHON_SUPPORT=ON -D INSTALL_PYTHON_EXAMPLES=ON -D WITH_FFMPEG=NO -D WITH_IPP=NO -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules -D WITH_OPENEXR=NO ..; make -j4; make install; ldconfig' && \
-     rm /opt/3.2.0.zip && \
-     rm /opt/opencv_contrib.zip
+  cd build && \
+  cmake -D CMAKE_BUILD_TYPE=RELEASE \
+    -D CMAKE_INSTALL_PREFIX=/usr/local \
+    -D BUILD_NEW_PYTHON_SUPPORT=ON \
+    -D INSTALL_PYTHON_EXAMPLES=ON
+    -D WITH_FFMPEG=NO
+    -D WITH_IPP=NO
+    -D OPENCV_EXTRA_MODULES_PATH=/opt/opencv_contrib-3.2.0/modules
+    -D WITH_OPENEXR=NO .. && \
+  make -j4 && \
+  make install && \
+  ldconfig && \
+  rm /opt/3.2.0.zip && \
+  rm /opt/opencv_contrib.zip
 
 # fix opencv python
-RUN cd /usr/local/lib/python3.4/site-packages/ && mv cv2.cpython-34m.so cv2.so && \
-    cd ~/.virtualenvs/cv/lib/python3.4/site-packages/ && \
-    ln -s /usr/local/lib/python3.4/site-packages/cv2.so cv2.so
+#RUN cd /usr/local/lib/python3.4/site-packages/ && mv cv2.cpython-34m.so cv2.so && \
+#    cd ~/.virtualenvs/cv/lib/python3.4/site-packages/ && \
+#    ln -s /usr/local/lib/python3.4/site-packages/cv2.so cv2.so
 
 # install dependencies
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 
 
