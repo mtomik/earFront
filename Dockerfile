@@ -4,12 +4,12 @@ FROM continuumio/miniconda3
 MAINTAINER Martin Tomik <mtomik@live.com>
 
 RUN apt-get update && apt-get -y upgrade && \
-    apt-get install -y --fix-missing libgtk2.0-dev
+    apt-get install -y --fix-missing libgtk2.0-dev libpq-dev
 
 COPY *.txt /
 RUN conda update -y --all && \
     conda install -y --file conda-requirements.txt && \
-    conda install -y -c menpo opencv3=3.1.0 && \
+    conda install -y -c menpo opencv3=3.2.0 && \
     pip install  -r requirements.txt
 
 # copy Django project
