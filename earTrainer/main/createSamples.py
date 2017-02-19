@@ -2,6 +2,7 @@ from subprocess import Popen, PIPE
 
 from earDetectionWebApp.settings import BASE_DIR
 from earTrainer.main.utils import Utils, PropertyUtils
+from earTrainer.models import SamplesModel
 import os.path
 from shutil import copyfile
 from sys import platform
@@ -10,7 +11,7 @@ import shutil
 
 class CreateSamples:
 
-    def __init__(self, result_dir, sample_count, x_angle, y_angle, z_angle, i_dev, w, h):
+    def __init__(self, result_dir, sampleModel:SamplesModel):
         propUtil = PropertyUtils()
 
         # docker props
@@ -24,13 +25,13 @@ class CreateSamples:
 
         self.workDir = propsmain.get('workdirpath')
         self.resultDir = os.path.join(self.workDir, result_dir)
-        self.sampleCount = sample_count
-        self.xAngle = x_angle
-        self.yAngle = y_angle
-        self.zAngle = z_angle
-        self.iDev = i_dev
-        self.w = w
-        self.h = h
+        self.sampleCount = sampleModel.positives
+        self.xAngle = sampleModel.x_angle
+        self.yAngle = sampleModel.y_angle
+        self.zAngle = sampleModel.z_angle
+        self.iDev = sampleModel.max_dev
+        self.w = sampleModel.w
+        self.h = sampleModel.h
         self.positiveDat = self.workDir+'positives.dat'
         self.negativeDat = self.workDir+'negatives.dat'
         self.perlScript = os.path.join(BASE_DIR,'earTrainer/scripts/createtrainsamples.pl')
@@ -40,6 +41,9 @@ class CreateSamples:
 
         if not os.path.exists(self.workDir):
             os.mkdir(self.workDir)
+
+        if not os.path.exists(self.resultDir):
+            os.mkdir(self.resultDir)
 
     def start(self):
         if not os.path.exists(self.positiveDat):
@@ -107,7 +111,7 @@ class CreateSamples:
         if not os.path.exists(os.path.join(self.workDir, 'mergevec.py')):
             copyfile('../scripts/mergevec.py', self.workDir+'mergevec.py')
 
-        Utils.run_command('python mergevec.py -v '+self.resultDir+' -o merged.vec', self.workDir)
+        Utils.run_command('python mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
         #os.chdir('../scripts')
         #os.system('mergevec.py -v '+self.resultDir+' -o merged.vec')
 

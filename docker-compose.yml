@@ -55,7 +55,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: DockerfileCelery
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh

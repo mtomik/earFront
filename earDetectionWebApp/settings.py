@@ -29,6 +29,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['147.175.106.116','localhost','127.0.0.1']
 
 
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -93,7 +96,7 @@ DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': os.path.join(BASE_DIR, 'sqlite.db'),
-    # }
+    # },
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.environ.get('DB_ENV_DB', 'postgres'),

@@ -6,13 +6,11 @@ import os
 from sys import platform
 from earDetectionWebApp.settings import BASE_DIR
 from glob import glob
-
+from earTrainer.models import TrainerModel
 
 class Trainer:
 
-    def __init__(self, resultDir, numPos, numNeg, numStages,
-                 precalcValBuf, precalcIdxBuf, numThreads, acceptanceBreak,
-                 w, h, bt, minHitRate, maxFalseAlarm, weightTrimRate, maxDepth, maxWeakCount, featureType ):
+    def __init__(self, trainModel:TrainerModel ):
 
         properties = PropertyUtils()
 
@@ -23,28 +21,29 @@ class Trainer:
             propsmain = properties.get_all('main')
 
 
-        self.resultDir = resultDir
+        self.resultDir = trainModel.name
 
         #ukladanie do vedlajsieho precinka
         self.resultDir = propsmain.get('resultsdir')
         self.workDir = propsmain.get('workdirpath')
+        self.samplesDir = trainModel.positives.name
 
-        self.numPos = numPos
-        self.numNeg = numNeg
-        self.numStages = numStages
-        self.precalcValBuf = precalcValBuf
-        self.precalcIdxBuf = precalcIdxBuf
-        self.numThreads = numThreads
-        self.acceptBreak = acceptanceBreak
-        self.w = w
-        self.h = h
-        self.bt = bt
-        self.minHitRate = minHitRate
-        self.maxFalseAlarm = maxFalseAlarm
-        self.weightTrimRate = weightTrimRate
-        self.maxDepth = maxDepth
-        self.maxWeakCount = maxWeakCount
-        self.featureType = featureType
+        self.numPos = trainModel.positives.positives
+        self.numNeg = trainModel.negatives
+        self.numStages = trainModel.num_stages
+        self.precalcValBuf = trainModel.precalcValBuf
+        self.precalcIdxBuf = trainModel.precalcIdxBuf
+        self.numThreads = trainModel.numThreads
+        self.acceptBreak = trainModel.acceptanceBreak
+        self.w = trainModel.positives.w
+        self.h = trainModel.positives.h
+        self.bt = trainModel.bt
+        self.minHitRate = trainModel.minHitRate
+        self.maxFalseAlarm = trainModel.maxFalseAlarm
+        self.weightTrimRate = trainModel.weightTrimRate
+        self.maxDepth = trainModel.maxDepth
+        self.maxWeakCount = trainModel.maxWeakCount
+        self.featureType = trainModel.featureType
 
 
     def start(self):
@@ -69,9 +68,13 @@ class Trainer:
         if platform == 'linux':
             opencv_trainer = opencv_trainer[:-4]
 
-        cmd = '%s -data %s -vec merged.vec -bg negatives.dat -numPos %i -numNeg %i -numStages %i -precalcValBufSize %i -precalcIdxBufSize %i' \
+        merged_file = os.path.join(self.samplesDir,'merged.vec')
+
+
+
+        cmd = '%s -data %s -vec %s -bg negatives.dat -numPos %i -numNeg %i -numStages %i -precalcValBufSize %i -precalcIdxBufSize %i' \
               ' -numThreads %i -acceptanceRatioBreakValue %.4f -w %i -h %i -bt %s -minHitRate %.3f -maxFalseAlarmRate %.3f -weightTrimRate %.2f -maxDepth %i -maxWeakCount %i -featureType %s' \
-            % (opencv_trainer, self.resultDir, self.numPos, self.numNeg, self.numStages, self.precalcValBuf, self.precalcIdxBuf,
+            % (opencv_trainer, self.resultDir, merged_file, self.numPos, self.numNeg, self.numStages, self.precalcValBuf, self.precalcIdxBuf,
             self.numThreads, self.acceptBreak, self.w, self.h, self.bt, self.minHitRate, self.maxFalseAlarm, self.weightTrimRate, self.maxDepth, self.maxWeakCount, self.featureType)
 
         Utils.run_command(cmd, self.workDir)
