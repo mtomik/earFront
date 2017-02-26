@@ -5,11 +5,13 @@ from earTrainer.tester.Comparator import Comparator
 from earTrainer.main.utils import PropertyUtils
 from sys import platform
 
+from shutil import copyfile
+
 cv2.ocl.setUseOpenCL(False)
 
 class Tester:
 
-    def __init__(self, xml_ear_file = '', descriptor_name = 'descriptor.txt'):
+    def __init__(self, xml_ear_file = '', descriptor_name = 'descriptor.txt', trainer_name = ''):
         self.root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
         properties = PropertyUtils()
@@ -31,7 +33,12 @@ class Tester:
         self.xml_ear_file = xml_ear_file
 
         if xml_ear_file is not '':
-            self.xml_file = os.path.join(self.xmls_dir,xml_ear_file)
+            #copy to xmls dir
+            new_name = trainer_name+'.xml'
+            copyfile(xml_ear_file,os.path.join(self.xmls_dir,new_name))
+            self.xml_file = os.path.join(self.xmls_dir,new_name)
+            #os.rename(os.path.join(self.xmls_dir,'cascade.xml'),self.xml_file)
+
             self.detector = cv2.CascadeClassifier(self.xml_file)
 
         self.result_dir = os.path.join(self.root_dir,'results/')

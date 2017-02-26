@@ -50,7 +50,8 @@ class SamplesModel(models.Model):
 
 class TrainerModel(models.Model):
 
-    name = models.CharField(max_length=30, unique=True)
+    name = models.CharField(max_length=30)
+    result_xml_path = models.CharField(max_length=100, default='')
     positives = models.ForeignKey(SamplesModel)
     negatives = models.IntegerField()
     num_stages = models.FloatField()

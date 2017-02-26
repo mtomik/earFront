@@ -3,9 +3,59 @@
 {% block content %}
 
     <div class="container">
+
         <div class="row">
             <div class="jumbotron">
-                <h1>Vysledky</h1>
+                <h1>Pozitivne vzorky</h1>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>Nazov</th>
+                            <th>positives</th>
+                            <th>status</th>
+                        </tr>
+                        {% for sample in all_samples %}
+                            <tr>
+                                <td>{{ sample.name }}</td>
+                                <td>{{ sample.positives }}</td>
+                                <td>{{ sample.status }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="jumbotron">
+                <h1>XML trening</h1>
+                <div class="table-responsive">
+                    <table class="table">
+                        <tr>
+                            <th>Nazov</th>
+                            <th>cest k xml</th>
+                            <th>pozitivne</th>
+                            <th>negativne</th>
+                            <th>status</th>
+                        </tr>
+                        {% for train in all_trainers %}
+                            <tr>
+                                <td>{{ train.name }}</td>
+                                <td>{{ train.result_xml_path }}</td>
+                                <td>{{ train.positives }}</td>
+                                <td>{{ train.negatives }}</td>
+                                <td>{{ train.status }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="jumbotron">
+                <h1>Testovanie</h1>
                 <div class="table-responsive">
                     <table class="table">
                         <tr>
@@ -13,7 +63,7 @@
                             <th>Vysledok</th>
                             <th>Status</th>
                         </tr>
-                        {% for test in all_testing %}
+                        {% for test in all_results %}
                             <tr>
                                 <td>{{ test.trainer.name }}</td>
                                 <td>{{ test.result }}</td>

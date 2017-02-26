@@ -20,7 +20,7 @@ class Utils:
         out, err = p.communicate()
         print("Return code: ", p.returncode)
         print(out.rstrip(), err.rstrip())
-        return out, err
+        return p.returncode
 
 
 class PropertyUtils:

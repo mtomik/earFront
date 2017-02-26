@@ -5,7 +5,6 @@ from earDetectionWebApp.celery import app
 from earTrainer.main.createSamples import CreateSamples
 from earTrainer.main.trainer import Trainer
 from earTrainer.tester.Tester import Tester
-
 from earTrainer.models import SamplesModel,TrainerModel, TesterModel
 
 @shared_task
@@ -25,11 +24,15 @@ def create_samples(self,samplesId):
     self.update_state(state="PROGRESS", meta={'progress': 10})
     sample_creator = CreateSamples(samples.name,samples)
     self.update_state(state="PROGRESS", meta={'progress': 20})
-    sample_creator.start()
+    return_code = sample_creator.start()
 
     self.update_state(state="PROGRESS", meta={'progress': 100})
 
-    samples.status = "FINISHED"
+    if return_code is 0:
+        samples.status = "FINISHED"
+    else:
+        samples.status = "FAILED"
+
     samples.save()
 
     return 'Samples: {0}'.format(samples.positives)
@@ -47,26 +50,36 @@ def start_training(self, trainerId):
 
     t = Trainer(trainerModel)
     self.update_state(state="PROGRESS", meta={'progress': 10})
-    t.start()
+    return_code = t.start()
     self.update_state(state="PROGRESS", meta={'progress': 100})
 
-    trainerModel.status = 'FINISHED'
+    if return_code is 0:
+        trainerModel.status = 'FINISHED'
+    else:
+        trainerModel.status = 'FAILED'
+
     trainerModel.save()
 
     return 'Finished!'
 
 
 @app.task(bind = True)
-def start_testing(self,tesingModel:TesterModel):
-    name = tesingModel.trainer.name
+def start_testing(self, testingModelPk):
+    testingModel = TesterModel.objects.get(pk=testingModelPk)
+    xml_path = testingModel.trainer.result_xml_path
 
-    print('Running tester for xml file ',name)
-    test = Tester(xml_ear_file=name)
+    # copy from trainer result to test result dir
+
+
+
+
+    print('Running tester for xml file ',xml_path)
+    test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name)
     result = test.start()
 
-    tesingModel.result = result
-    tesingModel.status = 'FINISHED'
-    tesingModel.save()
+    testingModel.result = result
+    testingModel.status = 'FINISHED'
+    testingModel.save()
 
     return result
 

@@ -47,7 +47,7 @@ class CreateSamplesForm(forms.Form):
         return self.cleaned_data[field_name]
 
 class TesterParams(forms.Form):
-    training = forms.CharField(label='xml_file', max_length=100)
+    xml_file = forms.CharField(label='xml_file', max_length=100)
 
     def clean_field(self,field_name):
         if self.cleaned_data[field_name] is None:

@@ -44,6 +44,7 @@ class Trainer:
         self.maxDepth = trainModel.maxDepth
         self.maxWeakCount = trainModel.maxWeakCount
         self.featureType = trainModel.featureType
+        self.trainerModel = trainModel
 
 
     def start(self):
@@ -77,6 +78,14 @@ class Trainer:
             % (opencv_trainer, self.resultDir, merged_file, self.numPos, self.numNeg, self.numStages, self.precalcValBuf, self.precalcIdxBuf,
             self.numThreads, self.acceptBreak, self.w, self.h, self.bt, self.minHitRate, self.maxFalseAlarm, self.weightTrimRate, self.maxDepth, self.maxWeakCount, self.featureType)
 
-        Utils.run_command(cmd, self.workDir)
+        self.trainerModel.status = 'RUNNING'
+        self.trainerModel.save()
+
+        return_code = Utils.run_command(cmd, self.workDir)
+
+        self.trainerModel.result_xml_path=os.path.join(self.resultDir,'cascade.xml')
+        self.trainerModel.save()
         # premenuj podla verzie
-        os.rename(os.path.join(self.resultDir,'cascade.xml'),os.path.join(self.resultDir,str(lastIndex)+'.xml'))
+        #os.rename(os.path.join(self.resultDir,'cascade.xml'),os.path.join(self.resultDir,str(lastIndex)+'.xml'))
+
+        return return_code

@@ -195,7 +195,7 @@
                                     {% csrf_token %}
                                     <div class="form-group">
                                         <label for="xml_file" class="form-control-label">XML File to test:</label>
-                                        <select class="form-control" id="xml_file">
+                                        <select class="form-control" id="xml_file" name="xml_file">
                                             {% for training in all_trainings %}
                                                 <option value="{{ training.pk }}">{{ training.name }} </option>
                                             {% endfor %}

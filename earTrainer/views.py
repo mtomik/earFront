@@ -96,25 +96,29 @@ def start_training_call(request):
 
 @login_required(login_url="../login/")
 def start_testing_call(request):
+    form = None
     if request.method == 'POST':
         form = TesterParams(request.POST)
         if form.is_valid():
             training = TrainerModel.objects.get(pk=form.clean_field('xml_file'))
-            print('Working with ',training)
 
             newTesting = TesterModel(trainer=training)
             newTesting.save()
 
-            start_testing.delay(newTesting)
-    return render(request, 'earTrainer.html')
+            start_testing.delay(newTesting.pk)
+    return render(request, 'earTrainer.html', {'form':form})
 
 
 @login_required(login_url="../login/")
 def show_results(request):
     # collect all testing results
     all_results = TesterModel.objects.all()
+    all_trainers = TrainerModel.objects.all()
+    all_samples = SamplesModel.objects.all()
 
-    return render(request, 'results.html',{'results':all_results})
+    return render(request, 'results.html',{'all_results':all_results,
+                                           'all_trainers':all_trainers,
+                                           'all_samples':all_samples})
 
 
 

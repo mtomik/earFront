@@ -38,6 +38,7 @@ class CreateSamples:
         self.samplesPath = propsmain.get('samplespath')
         self.os = propsenv.get('os')
         self.imageFormat = propsmain.get('imageformat')
+        self.samplesModel = sampleModel
 
         if not os.path.exists(self.workDir):
             os.mkdir(self.workDir)
@@ -54,13 +55,15 @@ class CreateSamples:
             print('Creating negatives.dat')
             self.create_dat(self, 'negatives')
 
+        self.samplesModel.status = 'RUNNING'
+        self.samplesModel.save()
+
 
         # run positive sample creator
         self.create_pos_samples(self)
 
         # merge created positive samples to single VEC
-        self.run_merge_vec()
-        print('Creating samples done!')
+        return self.run_merge_vec()
 
     def test(self):
         cmd = 'ls -al'
@@ -111,9 +114,11 @@ class CreateSamples:
         if not os.path.exists(os.path.join(self.workDir, 'mergevec.py')):
             copyfile('../scripts/mergevec.py', self.workDir+'mergevec.py')
 
-        Utils.run_command('python mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
+        return_code = Utils.run_command('python mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
         #os.chdir('../scripts')
         #os.system('mergevec.py -v '+self.resultDir+' -o merged.vec')
+
+        return return_code
 
 
 

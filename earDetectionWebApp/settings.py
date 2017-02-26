@@ -14,7 +14,7 @@ import os
 from kombu import Exchange, Queue
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -185,9 +185,9 @@ if not BROKER_URL:
         vhost=os.environ.get('RABBIT_ENV_VHOST', ''))
 
 # We don't want to have dead connections stored on rabbitmq, so we have to negotiate using heartbeats
-# BROKER_HEARTBEAT = '?heartbeat=30'
-# if not BROKER_URL.endswith(BROKER_HEARTBEAT):
-#     BROKER_URL += BROKER_HEARTBEAT
+BROKER_HEARTBEAT = '?heartbeat=30'
+if not BROKER_URL.endswith(BROKER_HEARTBEAT):
+    BROKER_URL += BROKER_HEARTBEAT
 
 #BROKER_POOL_LIMIT = 1
 #BROKER_CONNECTION_TIMEOUT = 10

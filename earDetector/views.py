@@ -8,11 +8,13 @@ import numpy as np
 import cv2
 from sklearn import datasets
 from skimage import data, io, filters
+from django.contrib.auth.decorators import login_required
 
 def home(request):
     return render(request, "earDetect.html")
 
 
+@login_required(login_url="../login/")
 def detect(request):
     if request.method == 'POST':
         form = PhotoUpload(request.POST, request.FILES)
@@ -54,7 +56,7 @@ def detect(request):
 
         return None
 
-
+@login_required(login_url="../login/")
 def detectSciKit(request):
     if request.method == 'POST':
         form = PhotoUpload(request.POST, request.FILES)
