@@ -7,6 +7,7 @@ import os.path
 from shutil import copyfile
 from sys import platform
 import shutil
+from earDetectionWebApp.settings import BASE_DIR
 
 
 class CreateSamples:
@@ -112,7 +113,7 @@ class CreateSamples:
 
     def run_merge_vec(self):
         if not os.path.exists(os.path.join(self.workDir, 'mergevec.py')):
-            copyfile('../scripts/mergevec.py', self.workDir+'mergevec.py')
+            copyfile(BASE_DIR+'/earTrainer/scripts/mergevec.py', self.workDir+'mergevec.py')
 
         return_code = Utils.run_command('python mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
         #os.chdir('../scripts')
