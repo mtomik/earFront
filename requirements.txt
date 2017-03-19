@@ -10,3 +10,4 @@ django-filter
 flower
 django-celery-results
 psycopg2
+opencv-python
