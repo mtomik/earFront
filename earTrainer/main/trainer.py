@@ -5,7 +5,6 @@ from decimal import *
 import os
 from sys import platform
 from earDetectionWebApp.settings import BASE_DIR
-from glob import glob
 from earTrainer.models import TrainerModel
 
 class Trainer:
@@ -50,14 +49,10 @@ class Trainer:
     def start(self):
         print('Running training')
 
-        last = glob(self.resultDir+'/*/')
+        lastIndex = 0
+        while os.path.exists(lastIndex):
+            lastIndex += 1
 
-        #ak je prazdny.. vytvor odznova
-        if len(last) == 0:
-            lastIndex = 1
-        else:
-            # sprav novy dir ako posledny index o jedna viac
-            lastIndex = int(os.path.basename(os.path.dirname(last[-1]))) + 1
 
         self.resultDir = os.path.join(os.path.dirname(self.resultDir), str(lastIndex))
         if not os.path.exists(self.resultDir):
