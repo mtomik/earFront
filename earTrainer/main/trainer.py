@@ -79,7 +79,7 @@ class Trainer:
 
 
         cmd = '%s -data %s -vec %s -bg negatives.dat -numPos %i -numNeg %i -numStages %i -precalcValBufSize %i -precalcIdxBufSize %i' \
-              ' -numThreads %i -acceptanceRatioBreakValue %.4f -w %i -h %i -bt %s -minHitRate %.3f -maxFalseAlarmRate %.3f -weightTrimRate %.2f -maxDepth %i -maxWeakCount %i -featureType %s' \
+              ' -numThreads %i -acceptanceRatioBreakValue %.8f -w %i -h %i -bt %s -minHitRate %.3f -maxFalseAlarmRate %.4f -weightTrimRate %.2f -maxDepth %i -maxWeakCount %i -featureType %s' \
             % (opencv_trainer, self.resultDir, merged_file, self.numPos, self.numNeg, self.numStages, self.precalcValBuf, self.precalcIdxBuf,
             self.numThreads, self.acceptBreak, self.w, self.h, self.bt, self.minHitRate, self.maxFalseAlarm, self.weightTrimRate, self.maxDepth, self.maxWeakCount, self.featureType)
 
