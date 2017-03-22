@@ -6,9 +6,7 @@
         <div class="row">
             <div class="jumbotron">
                 <h1>Trenovanie klasifikatora</h1>
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">Nove
-                    trenovanie
-                </button>
+
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#samples">Vytvorit
                     vzorky
                 </button>
@@ -17,7 +15,7 @@
                 </button>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#tester">Otestuj
                 </button>
-                <button type="button" class="btn btun-info btn-lg" onclick="location.href='{% url "results" %}'">Vysledky</button>
+                <button type="button" class="btn btun-info btn-lg" data-toggle="modal" onclick="location.href='{% url "results" %}'">Vysledky</button>
 
                 <!-- Modal -->
                 <div class="modal fade" id="samples" role="dialog">

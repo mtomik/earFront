@@ -39,7 +39,7 @@ class CreateSamplesForm(forms.Form):
     z_angle = forms.FloatField(label='z_angle', min_value=0, max_value=1, initial=1.0, required=False)
     max_dev = forms.IntegerField(label='max_dev', min_value=0, max_value=100, initial=40, required=False)
     w = forms.IntegerField(label='w', min_value=10, max_value=1000, initial=20, required=False)
-    h = forms.IntegerField(label='h', max_value=10, min_value=1000, initial=40, required=False)
+    h = forms.IntegerField(label='h', min_value=10, max_value=1000, initial=40, required=False)
 
     def clean_field(self,field_name):
         if self.cleaned_data[field_name] is None:

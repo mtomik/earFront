@@ -6,8 +6,7 @@ from earDetector.models import Image
 from earDetectionWebApp import settings
 import numpy as np
 import cv2
-from sklearn import datasets
-from skimage import data, io, filters
+from skimage import  io, filters
 from django.contrib.auth.decorators import login_required
 
 def home(request):
