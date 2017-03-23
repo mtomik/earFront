@@ -66,6 +66,7 @@ class TrainerModel(models.Model):
     maxDepth = models.IntegerField()
     maxWeakCount = models.IntegerField()
     featureType = models.CharField(max_length=10, default='LBP')
+    mode = models.CharField(default='ALL')
 
     status = models.CharField(max_length=50, default='NEW')
 

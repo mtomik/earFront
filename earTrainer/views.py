@@ -82,12 +82,13 @@ def start_training_call(request):
             maxDepth = form.clean_field('maxDepth')
             maxWeakCount = form.clean_field('maxWeakCount')
             featureType = form.clean_field('featureType')
+            mode = form.clean_field('mode')
 
             newTrainer = TrainerModel(name=name,positives=positives, negatives=negative_samples,
                                       num_stages=num_stages,precalcValBuf=precalcValBuf,precalcIdxBuf=precalcIdxBuf,
                                       numThreads=numThreads, acceptanceBreak=acceptanceBreak, bt=bt,
                                       minHitRate=minHitRate, maxFalseAlarm=maxFalseAlarm, weightTrimRate=weightTrimRate,
-                                      maxDepth=maxDepth, maxWeakCount=maxWeakCount, featureType=featureType)
+                                      maxDepth=maxDepth, maxWeakCount=maxWeakCount, featureType=featureType,mode=mode)
             newTrainer.save()
             start_training.delay(newTrainer.pk)
 
