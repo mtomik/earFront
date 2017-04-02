@@ -11,3 +11,5 @@ flower
 django-celery-results
 psycopg2
 opencv-python
+django-bootstrap3
+django-jquery

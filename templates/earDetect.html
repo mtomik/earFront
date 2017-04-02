@@ -13,10 +13,37 @@
                     <input id="image" type="file" name="image">
                 </p>
 
-            <p><input type="submit" value="Upload"/></p>
+                <div class="form-group">
+                    <label for="xml">XML</label>
+                    <select class="form-control" id="xml" name="xml">
+                        {% for xml in xmls %}
+                            <option value="{{ xml.1 }}">{{ xml.0 }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="checkbox">
+                    <label>
+                        <input name="cascade" id="cascade" data-toggle="toggle" type="checkbox">
+                        Haar detektor
+
+                    </label>
+                </div>
+                <div class="checkbox">
+                    <label>
+                        <input name="ellipse_find" id="ellipse_find" data-toggle="toggle" type="checkbox">
+                        Najdenie elipsy
+
+                    </label>
+                </div>
+
+            <p><input type="submit" value="Detect"/></p>
 
             </form>
-            <img src="{{ image }}">
+
+            {% for image in images %}
+                <img src="{{ image }}">
+            {% endfor %}
 
         </div>
     </div>

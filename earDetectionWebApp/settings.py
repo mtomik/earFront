@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'earTrainer',
     'earDetector',
+    'bootstrap3',
+    'jquery',
 ]
 
 MIDDLEWARE = [

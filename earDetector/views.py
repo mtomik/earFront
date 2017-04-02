@@ -1,6 +1,8 @@
 from django.shortcuts import render
+from sympy.geometry import ellipse
 
 from earDetectionWebApp.settings import BASE_DIR
+from earDetector.earDetect import earDetect
 from earDetector.forms import PhotoUpload
 from earDetector.models import Image
 from earDetectionWebApp import settings
@@ -8,9 +10,16 @@ import numpy as np
 import cv2
 from skimage import  io, filters
 from django.contrib.auth.decorators import login_required
+import binascii
+from PIL import Image
+import io
+import glob
+import os
+
 
 def home(request):
-    return render(request, "earDetect.html")
+    xmls = get_all_xmls()
+    return render(request, "earDetect.html",{'xmls':xmls})
 
 
 @login_required(login_url="../login/")
@@ -18,38 +27,22 @@ def detect(request):
     if request.method == 'POST':
         form = PhotoUpload(request.POST, request.FILES)
         if form.is_valid():
-            print('image received')
             #image = Image(image=request.FILES['image'])
             image = request.FILES['image']
             data = image.read()
             image.close()
-            print(BASE_DIR)
-            # TODO: Add xml classif
-            ear_detector = cv2.CascadeClassifier(BASE_DIR+'/earDetector/xml/haarcascade_frontalface_default.xml')
+            xml = form.clean_field('xml')
+            cascade = form.clean_field('cascade')
+            ellipse_find = form.clean_field('ellipse_find')
 
-            # from raw data to numPy image
-            np_arr = np.fromstring(data, np.uint8)
-            img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            detector = earDetect(xml)
+            images_url = detector.detect(data,image.name,cascade=cascade,ellipse=ellipse_find)
 
-            ears = ear_detector.detectMultiScale(gray, 1.3, 5)
-            for (x,y,w,h) in ears:
-                print('Ear found! x: {0} y: {1} w: {2} h: {3}'.format(x,y,w,h))
-                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            print(images_url)
 
+            return render(request, 'earDetect.html', {'images': images_url,
+                                            'xmls':get_all_xmls()})
 
-            # show debug image
-            # cv2.imshow('test',edges)
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
-
-            imageUrl = 'media/images/'+image.name
-            cv2.imwrite(imageUrl,img)
-            # image.image = edges
-            # image.save()
-            # cv2.im
-
-            return render(request, 'earDetect.html', {'image':'/'+imageUrl})
         else:
             form = PhotoUpload()
 
@@ -80,3 +73,10 @@ def detectSciKit(request):
             form = PhotoUpload()
 
         return None
+
+def get_all_xmls():
+    all_xmls = glob.glob(BASE_DIR + '/earDetector/xml/*.xml')
+    xmls = list()
+    for one_xml in all_xmls:
+        xmls.append((os.path.basename(one_xml), one_xml))
+    return xmls
