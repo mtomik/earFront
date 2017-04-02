@@ -1,22 +1,17 @@
 from django.shortcuts import render
-from sympy.geometry import ellipse
 
 from earDetectionWebApp.settings import BASE_DIR
 from earDetector.earDetect import earDetect
 from earDetector.forms import PhotoUpload
-from earDetector.models import Image
-from earDetectionWebApp import settings
-import numpy as np
-import cv2
+
 from skimage import  io, filters
 from django.contrib.auth.decorators import login_required
-import binascii
-from PIL import Image
+
 import io
 import glob
 import os
 
-
+@login_required(login_url="../login/")
 def home(request):
     xmls = get_all_xmls()
     return render(request, "earDetect.html",{'xmls':xmls})

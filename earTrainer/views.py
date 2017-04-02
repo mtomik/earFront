@@ -9,12 +9,8 @@ from django.core import serializers
 
 @login_required(login_url="../login/")
 def home(request):
-    all_samples = SamplesModel.objects.all().filter(status='FINISHED')
-
-    all_trainings = TrainerModel.objects.all().filter(status='FINISHED')
-
-    return render(request, "earTrainer.html",{'all_samples':all_samples,
-                                              'all_trainings':all_trainings})
+    return render(request, "earTrainer.html",{'all_samples':get_all_samples(),
+                                              'all_trainings':get_all_samples()})
 
 
 @login_required
@@ -57,7 +53,8 @@ def create_sample_call(request):
 
             # start async sample create
             create_samples.delay(newSamples.pk)
-    return render(request, 'earTrainer.html')
+    return render(request, 'earTrainer.html',{'all_samples':get_all_samples(),
+                                              'all_trainings':get_all_samples()})
 
 
 @login_required(login_url="../login/")
@@ -93,7 +90,8 @@ def start_training_call(request):
             start_training.delay(newTrainer.pk)
 
 
-    return render(request, 'earTrainer.html', {'form':form})
+    return render(request, 'earTrainer.html', {'form':form,'all_samples':get_all_samples(),
+                                              'all_trainings':get_all_samples()})
 
 @login_required(login_url="../login/")
 def start_testing_call(request):
@@ -107,7 +105,8 @@ def start_testing_call(request):
             newTesting.save()
 
             start_testing.delay(newTesting.pk)
-    return render(request, 'earTrainer.html', {'form':form})
+    return render(request, 'earTrainer.html', {'form':form, 'all_samples':get_all_samples(),
+                                              'all_trainings':get_all_samples()})
 
 
 @login_required(login_url="../login/")
@@ -120,6 +119,14 @@ def show_results(request):
     return render(request, 'results.html',{'all_results':all_results,
                                            'all_trainers':all_trainers,
                                            'all_samples':all_samples})
+
+
+def get_all_samples():
+    return SamplesModel.objects.all().filter(status='FINISHED')
+
+
+def get_all_trainings():
+    return TrainerModel.objects.all().filter(status='FINISHED')
 
 
 

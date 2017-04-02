@@ -99,7 +99,7 @@
                                             snimky:</label>
                                         <select class="form-control" id="samplesId" name="samplesId">
                                             {% for sample in all_samples %}
-                                                <option value="{{ sample.pk }}">{ { sample.name }}</option>
+                                                <option value="{{ sample.pk }}">{{ sample.name }}</option>
                                             {% endfor %}
 
                                         </select>
