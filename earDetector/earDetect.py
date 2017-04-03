@@ -4,6 +4,7 @@ from imutils.object_detection import non_max_suppression
 from earDetectionWebApp.settings import MEDIA_URL, BASE_DIR
 import io
 from PIL import Image
+import imutils
 
 class earDetect:
 
@@ -18,7 +19,7 @@ class earDetect:
     def showVersion(self):
         print(cv2.__version__)
 
-    def detect(self,data,name, cascade=True, ellipse=True):
+    def detect(self,data,name, cascade=True, ellipse=True, rotation=(True,15)):
         result_images = list()
         b_data = np.fromstring(data, np.uint8)
         img = Image.open(io.BytesIO(b_data)).convert('RGB')
@@ -33,8 +34,51 @@ class earDetect:
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
+
+        if rotation[0]:
+            return self.detect_with_rotation(img,gray,result_images,ellipse,name,rotation[1])
+
+        return self.detect_sequence(img,gray,result_images,ellipse,name)
+        # ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
+        #                                  minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
+        #
+        # if ears is not None:
+        #     print('Ear found by Cascade Detector!')
+        #     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in ears])
+        #     pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
+        #
+        #     # draw the final bounding boxes
+        #     for (xA, yA, xB, yB) in pick:
+        #         cv2.rectangle(img, (xA, yA), (xB, yB), (0, 255, 0), 2)
+        #
+        #     print("[INFO] : {} original boxes, {} after suppression".format(
+        #         len(rects), len(pick)))
+        #
+        #     if len(pick) > 0 :
+        #         img_url = self.save_image(img,name)
+        #         result_images.append(img_url)
+        #
+        #         if ellipse:
+        #             pick = self.return_biggest(pick)
+        #             only_ear = gray[pick[1]:pick[3], pick[0]:pick[2]]
+        #             img = self.contour_match(only_ear)
+        #             img2_url = self.save_image(img,'contour.jpg')
+        #             result_images.append(img2_url)
+        #
+        #
+        #         #TODO: aplikovat background substract
+        #         return result_images
+        #     else : return None
+        #
+        #
+        #     # cv2.imshow(one, img)
+        # else:
+        #     return None
+
+    def detect_sequence(self,orig,gray,result_images,ellipse,name):
         ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
-                                         minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
+                                              minSize=(1, 1), maxSize=(1000, 1000),
+                                              flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
 
         if ears is not None:
             print('Ear found by Cascade Detector!')
@@ -43,13 +87,13 @@ class earDetect:
 
             # draw the final bounding boxes
             for (xA, yA, xB, yB) in pick:
-                cv2.rectangle(img, (xA, yA), (xB, yB), (0, 255, 0), 2)
+                cv2.rectangle(orig, (xA, yA), (xB, yB), (0, 255, 0), 2)
 
             print("[INFO] : {} original boxes, {} after suppression".format(
                 len(rects), len(pick)))
 
             if len(pick) > 0 :
-                img_url = self.save_image(img,name)
+                img_url = self.save_image(orig,name)
                 result_images.append(img_url)
 
                 if ellipse:
@@ -62,12 +106,8 @@ class earDetect:
 
                 #TODO: aplikovat background substract
                 return result_images
-            else : return None
+        return None
 
-
-            # cv2.imshow(one, img)
-        else:
-            return None
 
     def save_image(self,data, name):
         image_url = MEDIA_URL+'images/' + name
@@ -117,6 +157,17 @@ class earDetect:
         ellipse = cv2.fitEllipse(biggest)
         cv2.ellipse(normal, ellipse, (255, 0, 0), 2)
         return normal
+
+    def detect_with_rotation(self,orig,gray,result_images,ellipse,name,angle):
+        for a in range(0,360,angle):
+            print('Rotating.. Angle: '+str(a))
+            rotated = imutils.rotate_bound(gray, a)
+            imgs = self.detect_sequence(orig,rotated,result_images,ellipse,name)
+            if imgs:
+                print('Ear found on angle: '+str(a))
+                return imgs
+        return None
+
 
 
 

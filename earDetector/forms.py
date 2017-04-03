@@ -2,7 +2,7 @@ from django import forms
 
 
 class PhotoUpload(forms.Form):
-    image = forms.ImageField(label='Select a image')
+    image = forms.ImageField(label='image')
     xml = forms.CharField(label='xml', max_length=100, required=True)
     cascade = forms.BooleanField(required=False)
     ellipse_find = forms.BooleanField(required=False)

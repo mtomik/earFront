@@ -39,9 +39,11 @@ def detect(request):
                                             'xmls':get_all_xmls()})
 
         else:
+            print('not valid')
             form = PhotoUpload()
 
-        return None
+
+    return None
 
 @login_required(login_url="../login/")
 def detectSciKit(request):
