@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
 from imutils.object_detection import non_max_suppression
-from earDetectionWebApp.settings import MEDIA_URL, BASE_DIR
+from earDetectionWebApp.settings import MEDIA_URL, BASE_DIR, MEDIA_ROOT
 import io
 from PIL import Image
 import imutils
-
+import os
 class earDetect:
 
     MAX_WIDTH = 300
@@ -110,10 +110,10 @@ class earDetect:
 
 
     def save_image(self,data, name):
-        image_url = MEDIA_URL+'images/' + name
+        image_url = os.path.join(MEDIA_ROOT,'images/',name)
         print(image_url)
         cv2.imwrite(image_url, data)
-        return '/'+image_url
+        return os.path.join('/',MEDIA_URL,'images/',name)
 
     def return_biggest(self,rects):
         return self.sort_rects(rects)[0][1]
