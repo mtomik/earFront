@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from .validators import validate_only_xml
 
 class Job(models.Model):
 
@@ -35,6 +36,7 @@ class Job(models.Model):
 
 class SamplesModel(models.Model):
     name = models.CharField(max_length=100, unique=True)
+    samples_dir = models.CharField(max_length=100)
     positives = models.IntegerField(default=0)
     x_angle = models.FloatField(default=0.3)
     y_angle = models.FloatField(default=0.3)
@@ -74,12 +76,18 @@ class TrainerModel(models.Model):
         return self.name
 
 class TesterModel(models.Model):
-    trainer = models.ForeignKey(TrainerModel)
+    name = models.CharField(max_length=100, default='default')
+    samples = models.CharField(max_length=100, default='samples')
+    trainer = models.ForeignKey(TrainerModel, blank=True, null=True)
     result = models.FloatField(default=0)
     status = models.CharField(max_length=50, default='NEW')
 
     def __str__(self):
-        return self.name
+        return self.trainer.name
+
+
+class XmlModel(models.Model):
+    xml_file = models.FileField(validators=[validate_only_xml])
 
 
 

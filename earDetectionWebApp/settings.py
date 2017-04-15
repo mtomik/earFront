@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 from kombu import Exchange, Queue
+from sys import platform
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -93,21 +94,35 @@ WSGI_APPLICATION = 'earDetectionWebApp.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
+properties = None
+from earTrainer.main.utils import PropertyUtils
+__prop = PropertyUtils()
+# check if in docker
+if os.path.exists('/.dockerenv'):
+    properties = __prop.get_all('docker')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_ENV_DB', 'postgres'),
+            'USER': os.environ.get('DB_ENV_POSTGRES_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_ENV_POSTGRES_PASSWORD', 'postgres'),
+            'HOST': os.environ.get('DB_PORT_5432_TCP_ADDR', 'db'),
+            'PORT': os.environ.get('DB_PORT_5432_TCP_PORT', '5432'),
+        },
+    }
+else:
 
-DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.sqlite3',
-    #     'NAME': os.path.join(BASE_DIR, 'sqlite.db'),
-    # },
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_ENV_DB', 'postgres'),
-        'USER': os.environ.get('DB_ENV_POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.environ.get('DB_ENV_POSTGRES_PASSWORD', 'postgres'),
-        'HOST': os.environ.get('DB_PORT_5432_TCP_ADDR', 'db'),
-        'PORT': os.environ.get('DB_PORT_5432_TCP_PORT', '5432'),
-    },
-}
+    if platform == 'linux':
+        properties = __prop.get_all('linux')
+    else:
+        properties = __prop.get_all('main')
+
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'sqlite.db'),
+        },
+    }
 
 
 # Password validation

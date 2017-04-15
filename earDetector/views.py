@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib import messages
 
 from earDetectionWebApp.settings import BASE_DIR
 from earDetector.earDetect import earDetect
@@ -27,16 +28,22 @@ def detect(request):
             data = image.read()
             image.close()
             xml = form.clean_field('xml')
-            cascade = form.clean_field('cascade')
             ellipse_find = form.clean_field('ellipse_find')
+            do_rotation = form.clean_field('do_rotation')
+            rotation = form.clean_field('rotation')
 
             detector = earDetect(xml)
-            images_url = detector.detect(data,image.name,cascade=cascade,ellipse=ellipse_find)
+            (images_url,a) = detector.detect(data, image.name, ellipse=ellipse_find, rotation=(do_rotation, rotation))
 
-            print(images_url)
+
+
+            if not images_url:
+                messages.warning(request,"Ziadne ucho nebolo najdene!", fail_silently=True)
+            else:
+                messages.success(request, "Ucho bolo najdene! Rotacia: "+str(a) + "°",fail_silently=True)
 
             return render(request, 'earDetect.html', {'images': images_url,
-                                            'xmls':get_all_xmls()})
+                                                      'xmls': get_all_xmls()})
 
         else:
             print('not valid')

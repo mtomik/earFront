@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
+from earTrainer.models import XmlModel
 
 
 # If you don't do this you cannot use Bootstrap CSS
@@ -34,6 +35,7 @@ class TrainerParams(forms.Form):
 
 class CreateSamplesForm(forms.Form):
     name = forms.CharField(label='name', required= True)
+    samples_dir = forms.CharField(label='samples_dir', required=True)
     positive_samples = forms.IntegerField(label='pos_samples', max_value=100000, min_value=10,required=True)
     x_angle = forms.FloatField(label='x_angle', min_value=0, max_value=2, initial=1.1, required=False) # 0.3
     y_angle = forms.FloatField(label='y_angle', min_value=0, max_value=2, initial=1.1, required=False) # 0.3
@@ -49,9 +51,15 @@ class CreateSamplesForm(forms.Form):
 
 class TesterParams(forms.Form):
     xml_file = forms.CharField(label='xml_file', max_length=100)
+    test_samples_dir = forms.CharField(label='test_samples_dir',max_length=100)
 
     def clean_field(self,field_name):
         if self.cleaned_data[field_name] is None:
             return self.fields[field_name].initial
         return self.cleaned_data[field_name]
+
+class XmlUploadForm(forms.ModelForm):
+    class Meta:
+        model = XmlModel
+        fields = ('xml_file',)
 

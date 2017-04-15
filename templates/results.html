@@ -11,12 +11,14 @@
                     <table class="table">
                         <tr>
                             <th>Nazov</th>
+                            <th>Zdrojovy priecinok</th>
                             <th>positives</th>
                             <th>status</th>
                         </tr>
                         {% for sample in all_samples %}
                             <tr>
                                 <td>{{ sample.name }}</td>
+                                <td>{{ sample.samples_dir }}</td>
                                 <td>{{ sample.positives }}</td>
                                 <td>{{ sample.status }}</td>
                             </tr>
@@ -59,12 +61,14 @@
                 <div class="table-responsive">
                     <table class="table">
                         <tr>
+                            <th>Meno</th>
                             <th>Nazov trenera</th>
                             <th>Vysledok</th>
                             <th>Status</th>
                         </tr>
                         {% for test in all_results %}
                             <tr>
+                                <td>{{ test.name }}</td>
                                 <td>{{ test.trainer.name }}</td>
                                 <td>{{ test.result }}</td>
                                 <td>{{ test.status }}</td>

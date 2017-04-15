@@ -2,27 +2,23 @@ import os
 import glob
 import cv2
 from ast import literal_eval
-from earTrainer.main.utils import PropertyUtils
-from sys import platform
+from earDetectionWebApp.settings import properties as propsmain
 
 class Comparator(object):
 
-    def __init__(self):
+    def __init__(self,samplesDir='samples/'):
         self.root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-        properties = PropertyUtils()
-
-        # docker props
-        if platform == 'linux':
-            propsmain = properties.get_all('docker')
-        else:
-            propsmain = properties.get_all('main')
 
         self.root = propsmain.get('testerdir')
 
         self.results = os.path.join(self.root,'results/')
-        self.descriptor = os.path.join(self.root,'descriptor.txt')
-        self.samples = os.path.join(self.root, 'samples/')
+        self.samples = os.path.join(self.root, samplesDir)
+
+        if not os.path.exists(os.path.join(self.samples,'descriptor.txt')):
+            raise FileNotFoundError('Descriptor not found in '+self.samples)
+        self.descriptor = os.path.join(self.samples,'descriptor.txt')
+
 
 
 

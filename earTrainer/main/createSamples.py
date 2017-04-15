@@ -1,28 +1,15 @@
 from subprocess import Popen, PIPE
-
-from earDetectionWebApp.settings import BASE_DIR
-from earTrainer.main.utils import Utils, PropertyUtils
+from earTrainer.main.utils import Utils
 from earTrainer.models import SamplesModel
 import os.path
 from shutil import copyfile
 from sys import platform
 import shutil
-from earDetectionWebApp.settings import BASE_DIR
-
+from earDetectionWebApp.settings import BASE_DIR, properties as propsmain
 
 class CreateSamples:
 
     def __init__(self, result_dir, sampleModel:SamplesModel):
-        propUtil = PropertyUtils()
-
-        # docker props
-        if platform == 'linux':
-            propsmain = propUtil.get_all('docker')
-        else:
-            propsmain = propUtil.get_all('main')
-
-        propsenv = propUtil.get_all('env')
-
 
         self.workDir = propsmain.get('workdirpath')
         self.resultDir = os.path.join(self.workDir, result_dir)
@@ -36,8 +23,8 @@ class CreateSamples:
         self.positiveDat = self.workDir+'positives.dat'
         self.negativeDat = self.workDir+'negatives.dat'
         self.perlScript = os.path.join(BASE_DIR,'earTrainer/scripts/createtrainsamples.pl')
-        self.samplesPath = propsmain.get('samplespath')
-        self.os = propsenv.get('os')
+        self.samplesRootPath = propsmain.get('samplespath')
+        self.samplesDir = sampleModel.samples_dir
         self.imageFormat = propsmain.get('imageformat')
         self.samplesModel = sampleModel
 
@@ -50,7 +37,7 @@ class CreateSamples:
     def start(self):
         if not os.path.exists(self.positiveDat):
             print('Creating positives.dat')
-            self.create_dat(self, 'positives')
+            self.create_dat(self, self.samplesDir)
 
         if not os.path.exists(self.negativeDat):
             print('Creating negatives.dat')
@@ -93,8 +80,8 @@ class CreateSamples:
     def create_dat(self, folder):
         datpath = self.workDir+folder+'.dat'
 
-        if not os.path.exists(self.samplesPath+folder):
-            print('This path: ', self.samplesPath+folder, ' doesnt exists!')
+        if not os.path.exists(self.samplesRootPath+folder):
+            print('This path: ', self.samplesRootPath+folder, ' doesnt exists!')
             return
 
         if os.path.exists(datpath):
@@ -103,9 +90,9 @@ class CreateSamples:
         count = 0
         f = open(datpath, 'w+')
 
-        for oneJpg in os.listdir(self.samplesPath+folder):
+        for oneJpg in os.listdir(self.samplesRootPath+folder):
             if oneJpg.endswith('.'+self.imageFormat):
-                f.write(os.path.join(self.samplesPath, folder, oneJpg)+'\n')
+                f.write(os.path.join(self.samplesRootPath, folder, oneJpg)+'\n')
                 count += 1
 
         print('Images found in ', folder, ': ', count)

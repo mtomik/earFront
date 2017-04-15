@@ -5,7 +5,7 @@ from earDetectionWebApp.celery import app
 from earTrainer.main.createSamples import CreateSamples
 from earTrainer.main.trainer import Trainer
 from earTrainer.tester.Tester import Tester
-from earTrainer.models import SamplesModel,TrainerModel, TesterModel
+from earTrainer.models import SamplesModel,TrainerModel, TesterModel, XmlModel
 
 @shared_task
 def add(x,y):
@@ -67,21 +67,43 @@ def start_training(self, trainerId):
 def start_testing(self, testingModelPk):
     testingModel = TesterModel.objects.get(pk=testingModelPk)
     xml_path = testingModel.trainer.result_xml_path
+    dir = testingModel.samples
 
     # copy from trainer result to test result dir
 
+    print('Running tester for xml file ',xml_path)
+    test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name, samples_dir=dir)
+    try:
+        result = test.start()
+        testingModel.result = result
+        testingModel.status = 'FINISHED'
+    except FileNotFoundError as err:
+        testingModel.result = -1
+        testingModel.status = 'ERROR'
+        testingModel.save()
+        raise FileNotFoundError(err)
 
+    testingModel.save()
+    return result
 
+@app.task(bind = True)
+def start_testing_xml(self, testingModelPk,xml_pk):
+    testingModel = TesterModel.objects.get(pk=testingModelPk)
+    xml_path = XmlModel.objects.get(pk=xml_pk).xml_file.path
+
+    # copy from trainer result to test result dir
 
     print('Running tester for xml file ',xml_path)
-    test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name)
+    test = Tester(xml_ear_file=xml_path,custom=True)
     result = test.start()
 
     testingModel.result = result
     testingModel.status = 'FINISHED'
     testingModel.save()
-
     return result
+
+
+
 
 
 

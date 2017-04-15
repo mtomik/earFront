@@ -15,7 +15,9 @@
                 </button>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#tester">Otestuj
                 </button>
-                <button type="button" class="btn btun-info btn-lg" data-toggle="modal" onclick="location.href='{% url "results" %}'">Vysledky</button>
+                <button type="button" class="btn btun-info btn-lg" data-toggle="modal"
+                        onclick="location.href='{% url "results" %}'">Vysledky
+                </button>
 
                 <!-- Modal -->
                 <div class="modal fade" id="samples" role="dialog">
@@ -33,6 +35,16 @@
                                     <div class="form-group">
                                         <label for="name" class="form-control-label">Meno:</label>
                                         <input type="text" name="name" class="form-control" id="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="samples_dir" class="form-control-label">Priecinok pozitivnych
+                                            vzoriek:</label>
+                                        <select class="form-control" id="samples_dir" name="samples_dir">
+                                            {% for sample in all_samples_dirs %}
+                                                <option value="{{ sample }}">{{ sample }}</option>
+                                            {% endfor %}
+
+                                        </select>
                                     </div>
                                     <div class="form-group">
                                         <label for="positive_samples" class="form-control-label">Pocet pozitivnych
@@ -126,9 +138,10 @@
                                         <label for="numThreads" class="form-control-label">numThreads</label>
                                         <input type="text" name="numThreads" class="form-control" id="numThreads">
                                     </div>
-                                 <div class="form-group">
+                                    <div class="form-group">
                                         <label for="acceptanceBreak" class="form-control-label">acceptanceBreak</label>
-                                        <input type="text" name="acceptanceBreak" class="form-control" id="acceptanceBreak">
+                                        <input type="text" name="acceptanceBreak" class="form-control"
+                                               id="acceptanceBreak">
                                     </div>
                                     <div class="form-group">
                                         <label for="bt" class="form-control-label">bt</label>
@@ -147,9 +160,10 @@
                                         <label for="maxFalseAlarm" class="form-control-label">maxFalseAlarm</label>
                                         <input type="text" name="maxFalseAlarm" class="form-control" id="maxFalseAlarm">
                                     </div>
-                                <div class="form-group">
+                                    <div class="form-group">
                                         <label for="weightTrimRate" class="form-control-label">weightTrimRate</label>
-                                        <input type="text" name="weightTrimRate" class="form-control" id="weightTrimRate">
+                                        <input type="text" name="weightTrimRate" class="form-control"
+                                               id="weightTrimRate">
                                     </div>
                                     <div class="form-group">
                                         <label for="maxDepth" class="form-control-label">maxDepth</label>
@@ -189,32 +203,93 @@
                 <!-- Modal -->
                 <div class="modal fade" id="tester" role="dialog">
                     <div class="modal-dialog" role="document">
-                        <form action="{% url "tester" %} " method="post">
 
-                            <!-- Modal content-->
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title">Spustenie testovania</h4>
-                                </div>
-                                <div class="modal-body">
-                                    {% csrf_token %}
-                                    <div class="form-group">
-                                        <label for="xml_file" class="form-control-label">XML File to test:</label>
-                                        <select class="form-control" id="xml_file" name="xml_file">
-                                            {% for training in all_trainings %}
-                                                <option value="{{ training.pk }}">{{ training.name }} </option>
-                                            {% endfor %}
-                                        </select>
+                        <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Spustenie testovania</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="panel-group" id="accordion">
+                                    <div class="panel panel-success">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#from_trainer">XML
+                                                    subor
+                                                    z treningu</a>
+                                            </h3>
+                                        </div>
+
+                                        <div id="from_trainer" class="panel-collapse collapse in">
+                                            <div class="panel-body">
+                                                <form action="{% url "tester" %} " method="post">
+                                                    {% csrf_token %}
+
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="xml_file" name="xml_file">
+                                                            {% for training in all_trainings %}
+                                                                <option value="{{ training.pk }}">{{ training.name }} </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-dismiss="modal">Zavriet
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">Start</button>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel panel-normal">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">
+                                                <a data-toggle="collapse" data-parent="#accordion" href="#custom">Vlastne
+                                                    XML</a>
+                                            </h3>
+                                        </div>
+
+                                        <div id="custom" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <form action="{% url "tester_custom" %} " method="post" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+
+                                                    <div class="form-group">
+                                                        <input type="file" id="xml_file" name="xml_file"
+                                                               class="form-control-file">
+                                                    </div>
+
+                                                    <div class="form-group">
+                                                        <select class="form-control" id="test_samples_dir" name="test_samples_dir">
+                                                            {% for dir in all_test_samples %}
+                                                                <option value="{{ dir }}">{{ dir }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-default"
+                                                                data-dismiss="modal">Zavriet
+                                                        </button>
+                                                        <button type="submit" class="btn btn-primary">Start</button>
+                                                    </div>
+
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>
-                                    <button type="submit" class="btn btn-primary">Start</button>
-                                </div>
+
+
                             </div>
-                        </form>
+
+                        </div>
+
 
                     </div>
                 </div>
@@ -223,7 +298,7 @@
                     {% for field in form %}
                         {% for error in field.errors %}
                             <div class="alert alert-danger">
-                                <strong>{{ error|escape }}</strong>
+                                <strong>{{ field.label_tag }}{{ error|escape }}</strong>
                             </div>
                         {% endfor %}
                     {% endfor %}
@@ -232,6 +307,16 @@
                             <strong>{{ error|escape }}</strong>
                         </div>
                     {% endfor %}
+                {% endif %}
+
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
 
 

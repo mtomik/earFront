@@ -6,6 +6,7 @@ import io
 from PIL import Image
 import imutils
 import os
+
 class earDetect:
 
     MAX_WIDTH = 300
@@ -19,7 +20,7 @@ class earDetect:
     def showVersion(self):
         print(cv2.__version__)
 
-    def detect(self,data,name, cascade=True, ellipse=True, rotation=(True,15)):
+    def detect(self,data,name, ellipse=True, rotation=(True,15)):
         result_images = list()
         b_data = np.fromstring(data, np.uint8)
         img = Image.open(io.BytesIO(b_data)).convert('RGB')
@@ -165,7 +166,7 @@ class earDetect:
             imgs = self.detect_sequence(orig,rotated,result_images,ellipse,name)
             if imgs:
                 print('Ear found on angle: '+str(a))
-                return imgs
+                return (imgs,a)
         return None
 
 

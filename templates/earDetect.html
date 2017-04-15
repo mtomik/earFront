@@ -7,58 +7,107 @@
         <div class="jumbotron">
             <h1>Detektor Ucha</h1>
 
-            <form action="{%  url "detect" %}" method="post" enctype="multipart/form-data">
-                {%  csrf_token %}
+
+            <div class="panel-group" id="accordion">
+                <div class="panel panel-success">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#cascade">Kaskadovy klasifikator</a>
+                        </h3>
+                    </div>
+
+                    <div id="cascade" class="panel-collapse collapse in">
+                        <div class="panel-body">
+                            <form action="{%  url "detect" %}" method="post" enctype="multipart/form-data">
+                                {%  csrf_token %}
 
 
-                <div class="form-group">
-                    <label for="image">Fotka</label>
-                    <input type="file" id="image" name="image" class="form-control-file">
+                                <div class="form-group">
+                                    <label for="image">Fotka</label>
+                                    <input type="file" id="image" name="image" class="form-control-file">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="xml">XML</label>
+                                    <select class="form-control" id="xml" name="xml">
+                                        {% for xml in xmls %}
+                                            <option value="{{ xml.1 }}">{{ xml.0 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+{#                                <div class="form-group">#}
+{#                                    <label for="cascade">Haar Detektor</label>#}
+{#                                    <input name="cascade" id="cascade" data-toggle="toggle"  type="checkbox">#}
+{##}
+                {#                    <div class="input-group">#}
+                {#                    <label for="rotation">Rotacia</label>#}
+                {#                    <span class="input-group-addon">#}
+                {#                        <input type="checkbox" aria-label="..." id="rotation" name="rotation">#}
+                {#                    </span>#}
+                {#                    <input type="text" class="form-control" aria-label="...">#}
+                {#                    </div>#}
+{##}
+{#                                </div>#}
+
+                {#                <div class="checkbox">#}
+                {#                    <label>#}
+                {#                        <input name="try_rotations" id="try_rotations" data-toggle="toggle" type="checkbox">#}
+                {#                        Skusit rozne rotacie#}
+                {#                    </label>#}
+                {#                </div>#}
+                                <div class="form-group">
+                                    <label for="ellipse_find">Najdenie elipsy</label>
+                                    <input name="ellipse_find" id="ellipse_find" data-toggle="toggle" type="checkbox">
+                                </div>
+                                <div class="form-group input-group">
+                                    <span class="input-group-addon">
+                                        <input type="checkbox" name="do_rotation" id="do_rotation">
+                                    </span>
+                                    <input type="number" class="form-control" name="rotation" id="rotation" placeholder="Uhol rotacie" min="0" max="360" step="5">
+                                </div>
+
+
+                            <p><input class="btn btn-primary btn-lg" type="submit" value="Spusti!"/></p>
+
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="xml">XML</label>
-                    <select class="form-control" id="xml" name="xml">
-                        {% for xml in xmls %}
-                            <option value="{{ xml.1 }}">{{ xml.0 }}</option>
-                        {% endfor %}
-                    </select>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            <a data-toggle="collapse" data-parent="#accordion" href="#cntk">Microsoft CNTK - Fast CNN</a>
+                        </h3>
+                    </div>
+
+                    <div id="cntk" class="panel-collapse collapse">
+                        <div class="panel-body">
+                            Nie je implementovane..
+                        </div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="cascade">Haar Detektor</label>
-                    <input name="cascade" id="cascade" data-toggle="toggle"  type="checkbox">
-
-{#                    <div class="input-group">#}
-{#                    <label for="rotation">Rotacia</label>#}
-{#                    <span class="input-group-addon">#}
-{#                        <input type="checkbox" aria-label="..." id="rotation" name="rotation">#}
-{#                    </span>#}
-{#                    <input type="text" class="form-control" aria-label="...">#}
-{#                    </div>#}
-
-                </div>
+            </div>
 
 
 
 
 
 
-{#                <div class="checkbox">#}
-{#                    <label>#}
-{#                        <input name="try_rotations" id="try_rotations" data-toggle="toggle" type="checkbox">#}
-{#                        Skusit rozne rotacie#}
-{#                    </label>#}
-{#                </div>#}
-                <div class="form-group">
-                    <label for="ellipse_find">Najdenie elipsy</label>
-                    <input name="ellipse_find" id="ellipse_find" data-toggle="toggle" type="checkbox">
-                </div>
 
 
-            <p><input class="btn btn-primary btn-lg" type="submit" value="Spusti!"/></p>
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" role="alert">
+                             {{ message }}
+                        </div>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-            </form>
 
             {% for image in images %}
                 <img src="{{ image }}">

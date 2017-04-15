@@ -2,15 +2,24 @@ from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from earTrainer.forms import TrainerParams, CreateSamplesForm, TesterParams
-from earTrainer.tasks import add, create_samples, start_training, start_testing
-from earTrainer.models import SamplesModel,TrainerModel, TesterModel
+from earTrainer.forms import TrainerParams, CreateSamplesForm, TesterParams, XmlUploadForm
+from earTrainer.tasks import add, create_samples, start_training, start_testing, start_testing_xml
+from earTrainer.models import SamplesModel,TrainerModel, TesterModel, XmlModel
 from django.core import serializers
+from django.contrib import messages
+from earTrainer.main.utils import Utils, PropertyUtils
+from sys import platform
+import glob
+import os
+from earDetectionWebApp.settings import properties
+from earTrainer.tester.Tester import Tester
 
 @login_required(login_url="../login/")
 def home(request):
     return render(request, "earTrainer.html",{'all_samples':get_all_samples(),
-                                              'all_trainings':get_all_samples()})
+                                              'all_trainings':get_all_trainings(),
+                                              'all_samples_dirs':get_all_samples_dir(),
+                                              'all_test_samples':get_all_test_dir()})
 
 
 @login_required
@@ -36,6 +45,7 @@ def create_sample_call(request):
         if form.is_valid():
 
             name = form.clean_field('name')
+            samples_dir = form.clean_field('samples_dir')
             pos_samples = form.clean_field('positive_samples')
             x_angle = form.clean_field('x_angle')
             y_angle = form.clean_field('y_angle')
@@ -44,7 +54,7 @@ def create_sample_call(request):
             w = form.clean_field('w')
             h = form.clean_field('h')
 
-            newSamples = SamplesModel(name=name,positives=pos_samples,x_angle=x_angle,
+            newSamples = SamplesModel(name=name,samples_dir=samples_dir, positives=pos_samples,x_angle=x_angle,
                                       y_angle=y_angle,z_angle=z_angle,max_dev=max_dev,w=w,h=h)
             newSamples.save()
 
@@ -53,9 +63,14 @@ def create_sample_call(request):
 
             # start async sample create
             create_samples.delay(newSamples.pk)
-    return render(request, 'earTrainer.html',{'all_samples':get_all_samples(),
-                                              'all_trainings':get_all_samples()})
 
+            messages.success(request, "Pozitivne vzorky sa zacali vytvarat..")
+
+
+    return render(request, 'earTrainer.html',{'all_samples':get_all_samples(),
+                                              'all_trainings':get_all_trainings(),
+                                              'all_samples_dirs': get_all_samples_dir(),
+                                              'all_test_samples':get_all_test_dir()})
 
 @login_required(login_url="../login/")
 def start_training_call(request):
@@ -89,9 +104,13 @@ def start_training_call(request):
             newTrainer.save()
             start_training.delay(newTrainer.pk)
 
+            messages.success(request, "Trenovanie klasifikatora prave zacalo.")
 
     return render(request, 'earTrainer.html', {'form':form,'all_samples':get_all_samples(),
-                                              'all_trainings':get_all_samples()})
+                                              'all_trainings':get_all_trainings(),
+                                               'all_samples_dirs': get_all_samples_dir(),
+                                               'all_test_samples': get_all_test_dir()})
+
 
 @login_required(login_url="../login/")
 def start_testing_call(request):
@@ -100,13 +119,54 @@ def start_testing_call(request):
         form = TesterParams(request.POST)
         if form.is_valid():
             training = TrainerModel.objects.get(pk=form.clean_field('xml_file'))
+            samples_dir = form.clean_field('test_samples_dir')
 
-            newTesting = TesterModel(trainer=training)
+            newTesting = TesterModel(trainer=training,samples=samples_dir)
             newTesting.save()
 
-            start_testing.delay(newTesting.pk)
+            try:
+                start_testing.delay(newTesting.pk)
+                messages.success(request, "Testovanie klasifikatora zacalo.")
+            except FileNotFoundError as err:
+                messages.error(request,err)
+
+
     return render(request, 'earTrainer.html', {'form':form, 'all_samples':get_all_samples(),
-                                              'all_trainings':get_all_samples()})
+                                              'all_trainings':get_all_trainings(),
+                                               'all_samples_dirs': get_all_samples_dir(),
+                                               'all_test_samples': get_all_test_dir()})
+
+
+@login_required(login_url="../login/")
+def start_testing_custom(request):
+    if request.method == 'POST':
+        form = XmlUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            file = form.save()
+
+            name = request.FILES['xml_file'].name
+            newTesting = TesterModel(name=name)
+
+            test = Tester(xml_ear_file=file.xml_file.path, custom=True)
+            try:
+                result = test.start()
+                newTesting.result = result
+                newTesting.status = 'FINISHED'
+                messages.success(request, "Testovanie klasifikatora zacalo.")
+            except FileNotFoundError as err:
+                newTesting.result = -1
+                newTesting.status = 'ERROR'
+                messages.error(request,err)
+
+            newTesting.save()
+
+    else:
+        form = XmlUploadForm()
+
+    return render(request, 'earTrainer.html', {'form': form, 'all_samples': get_all_samples(),
+                                               'all_trainings': get_all_trainings(),
+                                               'all_samples_dirs': get_all_samples_dir(),
+                                               'all_test_samples': get_all_test_dir()})
 
 
 @login_required(login_url="../login/")
@@ -127,6 +187,21 @@ def get_all_samples():
 
 def get_all_trainings():
     return TrainerModel.objects.all().filter(status='FINISHED')
+
+def get_all_samples_dir():
+    return get_dirs(properties.get('samplespath'))
+
+def get_all_test_dir():
+    return get_dirs(properties.get('testerdir'),['xmls','results'])
+
+
+def get_dirs(dir_path,exclude=None):
+    all_dirs = glob.glob(dir_path + "*")
+    dirs = list()
+    for one in all_dirs:
+        if os.path.isdir(one) and os.path.basename(one) not in exclude:
+            dirs.append(os.path.basename(one))
+    return dirs
 
 
 
