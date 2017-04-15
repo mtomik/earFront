@@ -4,8 +4,9 @@ import os
 from earTrainer.tester.Comparator import Comparator
 from earTrainer.main.utils import PropertyUtils
 from sys import platform
-
+from earDetectionWebApp.settings import properties as propsmain
 from shutil import copyfile
+import imutils
 
 cv2.ocl.setUseOpenCL(False)
 
@@ -14,13 +15,8 @@ class Tester:
     def __init__(self, xml_ear_file = '', descriptor_name = 'descriptor.txt', trainer_name = 'default', custom=False,samples_dir='samples/'):
         self.root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-        properties = PropertyUtils()
 
-        # docker props
-        if platform == 'linux':
-            propsmain = properties.get_all('docker')
-        else:
-            propsmain = properties.get_all('main')
+
 
         self.custom = custom
         self.root_dir = propsmain.get('testerdir')
@@ -92,6 +88,7 @@ class Tester:
                 print(one)
                 self.detect(one, not_found, results)
 
+            print(results)
             # print final result
             if not sum(results) == 0:
                 result = sum(results) / len(results)
@@ -104,6 +101,18 @@ class Tester:
 
         return result
 
+    def detect_with_rotate(self,img,angle):
+        print('checking with angle: '+str(angle))
+        rect = None
+        rotated = imutils.rotate_bound(img, angle)
+        ears = self.detector.detectMultiScale(rotated, scaleFactor=1.3, minNeighbors=5,
+                                              minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_SCALE_IMAGE)
+        for (x, y, w, h) in ears:
+            rect = (x, y, x + w, y + h)
+            print('X: {0} Y: {1} W: {2} H: {3} '.format(x, y, w, h))
+
+        return rect
+
 
     def detect(self,one, not_found, results,result_file=None):
         img = cv2.imread(one)
@@ -111,14 +120,17 @@ class Tester:
 
         rect = None
 
-        # detect ear
+        # Najdenie ucha aj s rotaciou 0 10 -10 20 -20 ...
         if self.detector is not None:
-            ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
-                                                  minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_SCALE_IMAGE)
-            for (x, y, w, h) in ears:
-                rect = (x, y, x + w, y + h)
-                print('X: {0} Y: {1} W: {2} H: {3} '.format(x, y, w, h))
-                cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            for a in range(0,60, 15):
+                rect = self.detect_with_rotate(gray,a)
+                if rect:
+                    break
+
+                if a > 0:
+                    rect = self.detect_with_rotate(gray, -a)
+                    if rect:
+                        break
 
         # TODO: implement IoS
         print('Comparing...')

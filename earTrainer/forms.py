@@ -59,7 +59,13 @@ class TesterParams(forms.Form):
         return self.cleaned_data[field_name]
 
 class XmlUploadForm(forms.ModelForm):
+    test_samples_dir = forms.CharField(label='test_samples_dir',max_length=100)
     class Meta:
         model = XmlModel
         fields = ('xml_file',)
+
+    def clean_field(self,field_name):
+        if self.cleaned_data[field_name] is None:
+            return self.fields[field_name].initial
+        return self.cleaned_data[field_name]
 

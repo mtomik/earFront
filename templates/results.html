@@ -62,6 +62,7 @@
                     <table class="table">
                         <tr>
                             <th>Meno</th>
+                            <th>Priecinok vzoriek</th>
                             <th>Nazov trenera</th>
                             <th>Vysledok</th>
                             <th>Status</th>
@@ -69,6 +70,7 @@
                         {% for test in all_results %}
                             <tr>
                                 <td>{{ test.name }}</td>
+                                <td>{{ test.samples }}</td>
                                 <td>{{ test.trainer.name }}</td>
                                 <td>{{ test.result }}</td>
                                 <td>{{ test.status }}</td>

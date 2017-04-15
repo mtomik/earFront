@@ -15,7 +15,7 @@
                 </button>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#tester">Otestuj
                 </button>
-                <button type="button" class="btn btun-info btn-lg" data-toggle="modal"
+                <button type="button" class="btn btn-warning btn-lg" data-toggle="modal"
                         onclick="location.href='{% url "results" %}'">Vysledky
                 </button>
 
@@ -234,6 +234,15 @@
                                                         </select>
                                                     </div>
 
+                                                    <div class="form-group">
+                                                        <label for="test_samples_dir" class="form-control-label">Testovaci priecinok</label>
+                                                        <select class="form-control" id="test_samples_dir" name="test_samples_dir">
+                                                            {% for dir in all_test_samples %}
+                                                                <option value="{{ dir }}">{{ dir }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-default"
                                                                 data-dismiss="modal">Zavriet
@@ -264,6 +273,7 @@
                                                     </div>
 
                                                     <div class="form-group">
+                                                        <label for="test_samples_dir" class="form-control-label">Testovaci priecinok</label>
                                                         <select class="form-control" id="test_samples_dir" name="test_samples_dir">
                                                             {% for dir in all_test_samples %}
                                                                 <option value="{{ dir }}">{{ dir }}</option>

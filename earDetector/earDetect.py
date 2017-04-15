@@ -17,29 +17,34 @@ class earDetect:
         self.xml_file = xmlfile
         self.detector = cv2.CascadeClassifier(self.xml_file)
 
-    def showVersion(self):
-        print(cv2.__version__)
 
-    def detect(self,data,name, ellipse=True, rotation=(True,15)):
+    def resize(self,pil_img):
+        w_percent = (self.MAX_WIDTH / float(pil_img.size[0]))
+        hsize = int((float(pil_img.size[1]) * float(w_percent)))
+        print('hSize: ' + str(hsize))
+        pil_img.thumbnail((self.MAX_WIDTH, hsize), Image.ANTIALIAS)
+        return np.array(pil_img)
+
+    def detect(self,img,name, ellipse=True, rotation=(True,15)):
         result_images = list()
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+        if rotation[0]:
+            return self.detect_with_rotation(img, gray, result_images, ellipse, name, rotation[1])
+
+        return self.detect_sequence(img, gray, result_images, ellipse, name)
+
+
+    def detect_from_bytes(self,data,name, ellipse=True, rotation=(True,15)):
         b_data = np.fromstring(data, np.uint8)
         img = Image.open(io.BytesIO(b_data)).convert('RGB')
-        w_percent = (self.MAX_WIDTH / float(img.size[0]))
-        hsize = int((float(img.size[1]) * float(w_percent)))
-        print('hSize: ' + str(hsize))
-        img.thumbnail((self.MAX_WIDTH, hsize), Image.ANTIALIAS)
+        img = self.resize(img)
 
         #np_arr = np.fromstring(image, np.uint8)
         #img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-        img = np.array(img)
 
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = cv2.cvtColor(gray,cv2.COLOR_GRAY2BGR)
-
-        if rotation[0]:
-            return self.detect_with_rotation(img,gray,result_images,ellipse,name,rotation[1])
-
-        return self.detect_sequence(img,gray,result_images,ellipse,name)
+        return self.detect(img,name,ellipse,rotation)
         # ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
         #                                  minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
         #
@@ -159,14 +164,28 @@ class earDetect:
         cv2.ellipse(normal, ellipse, (255, 0, 0), 2)
         return normal
 
+
+    def detect_rotate(self,img,gray,result_images,ellipse,name,angle):
+        rotated = imutils.rotate_bound(gray, angle)
+        imgs = self.detect_sequence(img, rotated, result_images, ellipse, name)
+        if imgs:
+            print('Ear found on angle: ' + str(angle))
+            return imgs, angle
+
     def detect_with_rotation(self,orig,gray,result_images,ellipse,name,angle):
-        for a in range(0,360,angle):
+        for a in range(0,180,angle):
             print('Rotating.. Angle: '+str(a))
-            rotated = imutils.rotate_bound(gray, a)
-            imgs = self.detect_sequence(orig,rotated,result_images,ellipse,name)
+            imgs = self.detect_rotate(orig,gray,result_images,ellipse,name,a)
             if imgs:
-                print('Ear found on angle: '+str(a))
-                return (imgs,a)
+                print('Ear found on angle: ' + str(a))
+                return imgs, a
+
+            if a > 0:
+                imgs = self.detect_rotate(orig, gray, result_images, ellipse, name, -a)
+                if imgs:
+                    print('Ear found on angle: ' + str(a))
+                    return imgs, a
+
         return None
 
 

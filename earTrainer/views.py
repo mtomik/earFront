@@ -1,14 +1,10 @@
 from django.shortcuts import render
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from earTrainer.forms import TrainerParams, CreateSamplesForm, TesterParams, XmlUploadForm
 from earTrainer.tasks import add, create_samples, start_training, start_testing, start_testing_xml
 from earTrainer.models import SamplesModel,TrainerModel, TesterModel, XmlModel
-from django.core import serializers
 from django.contrib import messages
-from earTrainer.main.utils import Utils, PropertyUtils
-from sys import platform
 import glob
 import os
 from earDetectionWebApp.settings import properties
@@ -20,7 +16,6 @@ def home(request):
                                               'all_trainings':get_all_trainings(),
                                               'all_samples_dirs':get_all_samples_dir(),
                                               'all_test_samples':get_all_test_dir()})
-
 
 @login_required
 def start(request):
@@ -128,7 +123,7 @@ def start_testing_call(request):
                 start_testing.delay(newTesting.pk)
                 messages.success(request, "Testovanie klasifikatora zacalo.")
             except FileNotFoundError as err:
-                messages.error(request,err)
+                messages.warning(request,err,fail_silently=True)
 
 
     return render(request, 'earTrainer.html', {'form':form, 'all_samples':get_all_samples(),
@@ -143,12 +138,13 @@ def start_testing_custom(request):
         form = XmlUploadForm(request.POST, request.FILES)
         if form.is_valid():
             file = form.save()
+            samples_dir = form.clean_field('test_samples_dir')
 
             name = request.FILES['xml_file'].name
-            newTesting = TesterModel(name=name)
+            newTesting = TesterModel(name=name,samples=samples_dir)
 
-            test = Tester(xml_ear_file=file.xml_file.path, custom=True)
             try:
+                test = Tester(xml_ear_file=file.xml_file.path, custom=True, samples_dir=samples_dir)
                 result = test.start()
                 newTesting.result = result
                 newTesting.status = 'FINISHED'
@@ -156,7 +152,7 @@ def start_testing_custom(request):
             except FileNotFoundError as err:
                 newTesting.result = -1
                 newTesting.status = 'ERROR'
-                messages.error(request,err)
+                messages.warning(request,err,fail_silently=True)
 
             newTesting.save()
 
@@ -199,7 +195,11 @@ def get_dirs(dir_path,exclude=None):
     all_dirs = glob.glob(dir_path + "*")
     dirs = list()
     for one in all_dirs:
-        if os.path.isdir(one) and os.path.basename(one) not in exclude:
+        if os.path.isdir(one):
+            if exclude:
+                if os.path.basename(one) in exclude:
+                    continue
+
             dirs.append(os.path.basename(one))
     return dirs
 
