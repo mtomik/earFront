@@ -2,8 +2,6 @@ import cv2
 import glob
 import os
 from earTrainer.tester.Comparator import Comparator
-from earTrainer.main.utils import PropertyUtils
-from sys import platform
 from earDetectionWebApp.settings import properties as propsmain
 from shutil import copyfile
 import imutils
@@ -47,7 +45,7 @@ class Tester:
         self.testing_samples = os.path.join(self.root_dir,samples_dir)
         self.descriptor = descriptor_name
         self.penalty = 0
-        self.comparator = Comparator(samplesDir=self.testing_samples)
+        self.comparator = Comparator(samplesDir=self.testing_samples,descriptor=self.descriptor)
 
     def start(self):
         print('#####################')

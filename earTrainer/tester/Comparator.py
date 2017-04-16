@@ -6,18 +6,22 @@ from earDetectionWebApp.settings import properties as propsmain
 
 class Comparator(object):
 
-    def __init__(self,samplesDir='samples/'):
+    def __init__(self,samplesDir='samples/',descriptor='descriptor.txt'):
         self.root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
         self.root = propsmain.get('testerdir')
 
+        self.descriptor_dir = os.path.join(self.root,'descriptors/')
+        if not os.path.exists(self.descriptor_dir):
+            os.makedirs(self.descriptor_dir)
+
         self.results = os.path.join(self.root,'results/')
         self.samples = os.path.join(self.root, samplesDir)
 
-        if not os.path.exists(os.path.join(self.samples,'descriptor.txt')):
-            raise FileNotFoundError('Descriptor not found in '+self.samples)
-        self.descriptor = os.path.join(self.samples,'descriptor.txt')
+        if not os.path.exists(os.path.join(self.descriptor_dir,descriptor)):
+            raise FileNotFoundError('Descriptor '+self.descriptor+' not found in '+self.descriptor_dir)
+        self.descriptor = os.path.join(self.descriptor_dir,descriptor)
 
 
 

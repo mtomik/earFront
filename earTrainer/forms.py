@@ -52,6 +52,7 @@ class CreateSamplesForm(forms.Form):
 class TesterParams(forms.Form):
     xml_file = forms.CharField(label='xml_file', max_length=100)
     test_samples_dir = forms.CharField(label='test_samples_dir',max_length=100)
+    descriptor = forms.CharField(label='descriptor',max_length=100)
 
     def clean_field(self,field_name):
         if self.cleaned_data[field_name] is None:
@@ -60,6 +61,8 @@ class TesterParams(forms.Form):
 
 class XmlUploadForm(forms.ModelForm):
     test_samples_dir = forms.CharField(label='test_samples_dir',max_length=100)
+    descriptor = forms.CharField(label='descriptor',max_length=100)
+
     class Meta:
         model = XmlModel
         fields = ('xml_file',)

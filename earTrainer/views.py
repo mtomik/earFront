@@ -15,7 +15,8 @@ def home(request):
     return render(request, "earTrainer.html",{'all_samples':get_all_samples(),
                                               'all_trainings':get_all_trainings(),
                                               'all_samples_dirs':get_all_samples_dir(),
-                                              'all_test_samples':get_all_test_dir()})
+                                              'all_test_samples':get_all_test_dir(),
+                                              'all_descriptors':get_all_descriptors()})
 
 @login_required
 def start(request):
@@ -65,7 +66,8 @@ def create_sample_call(request):
     return render(request, 'earTrainer.html',{'all_samples':get_all_samples(),
                                               'all_trainings':get_all_trainings(),
                                               'all_samples_dirs': get_all_samples_dir(),
-                                              'all_test_samples':get_all_test_dir()})
+                                              'all_test_samples':get_all_test_dir(),
+                                              'all_descriptors': get_all_descriptors()})
 
 @login_required(login_url="../login/")
 def start_training_call(request):
@@ -104,7 +106,8 @@ def start_training_call(request):
     return render(request, 'earTrainer.html', {'form':form,'all_samples':get_all_samples(),
                                               'all_trainings':get_all_trainings(),
                                                'all_samples_dirs': get_all_samples_dir(),
-                                               'all_test_samples': get_all_test_dir()})
+                                               'all_test_samples': get_all_test_dir(),
+                                               'all_descriptors': get_all_descriptors()})
 
 
 @login_required(login_url="../login/")
@@ -115,8 +118,9 @@ def start_testing_call(request):
         if form.is_valid():
             training = TrainerModel.objects.get(pk=form.clean_field('xml_file'))
             samples_dir = form.clean_field('test_samples_dir')
+            descriptor = form.clean_field('descriptor')
 
-            newTesting = TesterModel(trainer=training,samples=samples_dir)
+            newTesting = TesterModel(trainer=training,samples=samples_dir,descriptor=descriptor)
             newTesting.save()
 
             try:
@@ -129,7 +133,8 @@ def start_testing_call(request):
     return render(request, 'earTrainer.html', {'form':form, 'all_samples':get_all_samples(),
                                               'all_trainings':get_all_trainings(),
                                                'all_samples_dirs': get_all_samples_dir(),
-                                               'all_test_samples': get_all_test_dir()})
+                                               'all_test_samples': get_all_test_dir(),
+                                               'all_descriptors': get_all_descriptors()})
 
 
 @login_required(login_url="../login/")
@@ -139,12 +144,13 @@ def start_testing_custom(request):
         if form.is_valid():
             file = form.save()
             samples_dir = form.clean_field('test_samples_dir')
+            descriptor = form.clean_field('descriptor')
 
             name = request.FILES['xml_file'].name
-            newTesting = TesterModel(name=name,samples=samples_dir)
+            newTesting = TesterModel(name=name,samples=samples_dir,descriptor=descriptor)
 
             try:
-                test = Tester(xml_ear_file=file.xml_file.path, custom=True, samples_dir=samples_dir)
+                test = Tester(xml_ear_file=file.xml_file.path, custom=True, samples_dir=samples_dir,descriptor_name=descriptor)
                 result = test.start()
                 newTesting.result = result
                 newTesting.status = 'FINISHED'
@@ -162,7 +168,8 @@ def start_testing_custom(request):
     return render(request, 'earTrainer.html', {'form': form, 'all_samples': get_all_samples(),
                                                'all_trainings': get_all_trainings(),
                                                'all_samples_dirs': get_all_samples_dir(),
-                                               'all_test_samples': get_all_test_dir()})
+                                               'all_test_samples': get_all_test_dir(),
+                                               'all_descriptors': get_all_descriptors()})
 
 
 @login_required(login_url="../login/")
@@ -188,8 +195,10 @@ def get_all_samples_dir():
     return get_dirs(properties.get('samplespath'))
 
 def get_all_test_dir():
-    return get_dirs(properties.get('testerdir'),['xmls','results'])
+    return get_dirs(properties.get('testerdir'),['xmls','results','descriptors'])
 
+def get_all_descriptors():
+    return get_files(os.path.join(properties.get('testerdir'),'descriptors/'),'.txt')
 
 def get_dirs(dir_path,exclude=None):
     all_dirs = glob.glob(dir_path + "*")
@@ -202,6 +211,17 @@ def get_dirs(dir_path,exclude=None):
 
             dirs.append(os.path.basename(one))
     return dirs
+
+
+def get_files(path,type):
+    all_files = glob.glob(path+'*'+type)
+    files = list()
+    for one in all_files:
+        if os.path.isfile(one) and os.path.splitext(one)[1] == type:
+            files.append(os.path.basename(one))
+
+    return files
+
 
 
 

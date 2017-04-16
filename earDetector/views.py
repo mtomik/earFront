@@ -33,7 +33,7 @@ def detect(request):
             rotation = form.clean_field('rotation')
 
             detector = earDetect(xml)
-            (images_url,a) = detector.detect(data, image.name, ellipse=ellipse_find, rotation=(do_rotation, rotation))
+            (images_url,a) = detector.detect_from_bytes(data, image.name, ellipse=ellipse_find, rotation=(do_rotation, rotation))
 
 
 

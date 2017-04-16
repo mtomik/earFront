@@ -78,6 +78,7 @@ class TrainerModel(models.Model):
 class TesterModel(models.Model):
     name = models.CharField(max_length=100, default='default')
     samples = models.CharField(max_length=100, default='samples')
+    descriptor = models.CharField(max_length=100, default='descriptor.txt')
     trainer = models.ForeignKey(TrainerModel, blank=True, null=True)
     result = models.FloatField(default=0)
     status = models.CharField(max_length=50, default='NEW')
