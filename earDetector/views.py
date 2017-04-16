@@ -35,7 +35,8 @@ def detect(request):
             detector = earDetect(xml)
             (images_url,a) = detector.detect_from_bytes(data, image.name, ellipse=ellipse_find, rotation=(do_rotation, rotation))
 
-
+            print('Im;'+str(images_url))
+            print('A:'+str(a))
 
             if not images_url:
                 messages.warning(request,"Ziadne ucho nebolo najdene!", fail_silently=True)

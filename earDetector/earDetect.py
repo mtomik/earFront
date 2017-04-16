@@ -27,13 +27,14 @@ class earDetect:
 
     def detect(self,img,name, ellipse=True, rotation=(True,15)):
         result_images = list()
+
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
 
         if rotation[0]:
             return self.detect_with_rotation(img, gray, result_images, ellipse, name, rotation[1])
 
-        return self.detect_sequence(img, gray, result_images, ellipse, name)
+        return self.detect_sequence(img, gray, result_images, ellipse, name),0
 
 
     def detect_from_bytes(self,data,name, ellipse=True, rotation=(True,15)):
@@ -153,7 +154,6 @@ class earDetect:
         biggest_area = 0
         for one in cnts:
             area = cv2.contourArea(one)
-            print(area)
 
             if len(one) > 5:
                 if biggest_area < area:
@@ -170,7 +170,7 @@ class earDetect:
         imgs = self.detect_sequence(img, rotated, result_images, ellipse, name)
         if imgs:
             print('Ear found on angle: ' + str(angle))
-            return imgs, angle
+            return imgs
 
     def detect_with_rotation(self,orig,gray,result_images,ellipse,name,angle):
         for a in range(0,180,angle):
@@ -178,13 +178,13 @@ class earDetect:
             imgs = self.detect_rotate(orig,gray,result_images,ellipse,name,a)
             if imgs:
                 print('Ear found on angle: ' + str(a))
-                return imgs, a
+                return (imgs, a)
 
             if a > 0:
                 imgs = self.detect_rotate(orig, gray, result_images, ellipse, name, -a)
                 if imgs:
                     print('Ear found on angle: ' + str(a))
-                    return imgs, a
+                    return (imgs, a)
 
         return None
 
