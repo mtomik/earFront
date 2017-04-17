@@ -68,11 +68,12 @@ def start_testing(self, testingModelPk):
     testingModel = TesterModel.objects.get(pk=testingModelPk)
     xml_path = testingModel.trainer.result_xml_path
     dir = testingModel.samples
+    descriptor = testingModel.descriptor
 
     # copy from trainer result to test result dir
 
     print('Running tester for xml file ',xml_path)
-    test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name, samples_dir=dir)
+    test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name, samples_dir=dir, descriptor_name=descriptor)
     try:
         result = test.start()
         testingModel.result = result

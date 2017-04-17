@@ -1,6 +1,9 @@
 from subprocess import Popen, PIPE
 import os.path
 import configparser
+import numpy
+import glob
+from scipy import misc
 
 from earDetectionWebApp.settings import BASE_DIR
 
@@ -23,6 +26,7 @@ class Utils:
         return p.returncode
 
 
+
 class PropertyUtils:
 
     def __init__(self):
@@ -32,3 +36,16 @@ class PropertyUtils:
     def get_all(self,name):
         print(dict(self.config.items(name)))
         return dict(self.config.items(name))
+
+
+class ImageUtils:
+
+    def invert(self, dir):
+        imgs = glob.glob(dir+'*.jpg')
+        print('Flipping images..')
+        for one in imgs:
+            img = misc.imread(one)
+            img = numpy.fliplr(img)
+            misc.imsave(one,img)
+        print('Done!')
+
