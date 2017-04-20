@@ -28,13 +28,23 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="xml">XML</label>
-                                    <select class="form-control" id="xml" name="xml">
+                                    <label for="xml_left">XML pre Lave Ucho</label>
+                                    <select class="form-control" id="xml_left" name="xml_left">
                                         {% for xml in xmls %}
-                                            <option value="{{ xml.1 }}">{{ xml.0 }}</option>
+                                            <option value="{{ xml }}">{{ xml }}</option>
                                         {% endfor %}
                                     </select>
                                 </div>
+
+                                <div class="form-group">
+                                    <label for="xml_right">XML pre Prave Ucho</label>
+                                    <select class="form-control" id="xml_right" name="xml_right">
+                                        {% for xml in xmls %}
+                                            <option value="{{ xml }}">{{ xml }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
 
 {#                                <div class="form-group">#}
 {#                                    <label for="cascade">Haar Detektor</label>#}

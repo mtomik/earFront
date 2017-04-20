@@ -1,10 +1,7 @@
-import configparser
-from subprocess import Popen, PIPE
-from earTrainer.main.utils import Utils, PropertyUtils
-from decimal import *
+from earTrainer.main.utils import Utils
 import os
 from sys import platform
-from earDetectionWebApp.settings import BASE_DIR
+from earDetectionWebApp.settings import BASE_DIR,properties as propsmain
 from glob import glob
 from earTrainer.models import TrainerModel
 
@@ -12,13 +9,6 @@ class Trainer:
 
     def __init__(self, trainModel:TrainerModel ):
 
-        properties = PropertyUtils()
-
-        # docker props
-        if platform == 'linux':
-            propsmain = properties.get_all('docker')
-        else:
-            propsmain = properties.get_all('main')
 
 
         self.resultDir = trainModel.name

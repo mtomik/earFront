@@ -1,11 +1,20 @@
 import cv2
 import numpy as np
 from imutils.object_detection import non_max_suppression
-from earDetectionWebApp.settings import MEDIA_URL, BASE_DIR, MEDIA_ROOT
+from earDetectionWebApp.settings import MEDIA_URL, BASE_DIR, MEDIA_ROOT,properties
+
 import io
 from PIL import Image
 import imutils
 import os
+
+
+class earDetectParams():
+    def __init__(self,data,name, ellipse=True, rotation=(True,15)):
+        self.data = data
+        self.name = name
+        self.ellipse = ellipse
+        self.rotation = rotation
 
 class earDetect:
 
@@ -14,8 +23,7 @@ class earDetect:
     detector = None
 
     def __init__(self, xmlfile):
-        self.xml_file = xmlfile
-        self.detector = cv2.CascadeClassifier(self.xml_file)
+        self.detector = cv2.CascadeClassifier(os.path.join(properties.get('testerdir'),'xmls',xmlfile))
 
 
     def resize(self,pil_img):
@@ -37,15 +45,15 @@ class earDetect:
         return self.detect_sequence(img, gray, result_images, ellipse, name),0
 
 
-    def detect_from_bytes(self,data,name, ellipse=True, rotation=(True,15)):
-        b_data = np.fromstring(data, np.uint8)
+    def detect_from_bytes(self,params:earDetectParams):
+        b_data = np.fromstring(params.data, np.uint8)
         img = Image.open(io.BytesIO(b_data)).convert('RGB')
         img = self.resize(img)
 
         #np_arr = np.fromstring(image, np.uint8)
         #img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
-        return self.detect(img,name,ellipse,rotation)
+        return self.detect(img,params.name,params.ellipse,params.rotation)
         # ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
         #                                  minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
         #
@@ -106,14 +114,25 @@ class earDetect:
                 if ellipse:
                     pick = self.return_biggest(pick)
                     only_ear = gray[pick[1]:pick[3], pick[0]:pick[2]]
-                    img = self.contour_match(only_ear)
+                    img,ellipse_shape = self.contour_match(only_ear)
                     img2_url = self.save_image(img,'contour.jpg')
                     result_images.append(img2_url)
 
+                    # cutting everything outside ellipse
+                    img = self.cut_only_ellipse(only_ear,ellipse_shape)
+                    img3_url = self.save_image(img,'contour_cut.jpg')
+                    result_images.append(img3_url)
 
                 #TODO: aplikovat background substract
                 return result_images
         return None
+
+    def cut_only_ellipse(self,img,ellipse):
+        mask = np.zeros_like(img)
+        cv2.ellipse(mask,ellipse,(255,255,255),-1)
+        return np.bitwise_and(img,mask)
+
+
 
 
     def save_image(self,data, name):
@@ -162,7 +181,7 @@ class earDetect:
 
         ellipse = cv2.fitEllipse(biggest)
         cv2.ellipse(normal, ellipse, (255, 0, 0), 2)
-        return normal
+        return normal,ellipse
 
 
     def detect_rotate(self,img,gray,result_images,ellipse,name,angle):
@@ -187,6 +206,9 @@ class earDetect:
                     return (imgs, a)
 
         return None
+
+
+
 
 
 

@@ -20,35 +20,39 @@ class CreateSamples:
         self.iDev = sampleModel.max_dev
         self.w = sampleModel.w
         self.h = sampleModel.h
-        self.positiveDat = self.workDir+'positives.dat'
-        self.negativeDat = self.workDir+'negatives.dat'
+
         self.perlScript = os.path.join(BASE_DIR,'earTrainer/scripts/createtrainsamples.pl')
         self.samplesRootPath = propsmain.get('samplespath')
         self.samplesDir = sampleModel.samples_dir
+        self.negativesDir = 'negatives'
+
         self.imageFormat = propsmain.get('imageformat')
         self.samplesModel = sampleModel
 
+        self.positivesDat = 'None'
+        self.negativesDat = 'None'
+
         if not os.path.exists(self.workDir):
             os.mkdir(self.workDir)
-
-        if not os.path.exists(self.resultDir):
-            os.mkdir(self.resultDir)
+        if os.path.exists(self.resultDir):
+            shutil.rmtree(self.resultDir)
+        os.mkdir(self.resultDir)
 
     def start(self):
-        if not os.path.exists(self.positiveDat):
-            print('Creating positives.dat')
-            self.create_dat(self, self.samplesDir)
 
-        if not os.path.exists(self.negativeDat):
-            print('Creating negatives.dat')
-            self.create_dat(self, 'negatives')
+        print('Creating positives.dat')
+        self.positivesDat = self.create_positive_dat()
 
+        print('Creating negatives.dat')
+        self.negativesDat = self.create_negative_dat()
+
+        print(str(self.negativesDat)+' '+str(self.positivesDat))
         self.samplesModel.status = 'RUNNING'
         self.samplesModel.save()
 
 
         # run positive sample creator
-        self.create_pos_samples(self)
+        self.create_pos_samples()
 
         # merge created positive samples to single VEC
         return self.run_merge_vec()
@@ -60,43 +64,47 @@ class CreateSamples:
         print("Return code: ", p.returncode)
         print(out.rstrip(), err.rstrip())
 
-    @staticmethod
     def create_pos_samples(self,):
         print('Running create samples script!')
-        shutil.rmtree(self.resultDir)
         opencv_sampler = 'opencv_createsamples.exe'
 
         if platform == 'linux':
             opencv_sampler = opencv_sampler[:-4]
 
         cmd = 'perl %s %s %s %s %i \"%s -bgcolor 0 -bgthresh 0 -maxxangle %.1f -maxyangle %.1f -maxzangle %.1f -maxidev %i -w %i -h %i \"' \
-              % (self.perlScript, self.positiveDat, self.negativeDat,
+              % (self.perlScript, self.positivesDat, self.negativesDat,
                  self.resultDir, self.sampleCount, opencv_sampler, self.xAngle, self.yAngle, self.zAngle, self.iDev,
                  self.w, self.h)
         # creates samples on desired destination
         Utils.run_command(cmd)
 
-    @staticmethod
-    def create_dat(self, folder):
-        datpath = self.workDir+folder+'.dat'
+    def create_positive_dat(self):
+        return self.create_dat(self.samplesDir)
 
-        if not os.path.exists(self.samplesRootPath+folder):
-            print('This path: ', self.samplesRootPath+folder, ' doesnt exists!')
+    def create_negative_dat(self):
+        return self.create_dat(self.negativesDir,True)
+
+    def create_dat(self, source_folder, isnegative=False):
+        images_path = os.path.join(self.samplesRootPath,source_folder)
+        print('ImagesPath '+images_path)
+        if isnegative:
+            result_dat_path = os.path.join(self.workDir,'negative.dat')
+        else:
+            result_dat_path = os.path.join(self.resultDir,'positive.dat')
+
+        if not os.path.exists(images_path):
+            print('Source folder: ', images_path, ' doesn\'t exists!')
             return
 
-        if os.path.exists(datpath):
-            os.remove(datpath)
-
         count = 0
-        f = open(datpath, 'w+')
+        with open(result_dat_path,'w+') as f:
+            for oneJpg in os.listdir(images_path):
+                if oneJpg.endswith('.'+self.imageFormat):
+                    f.write(os.path.join(images_path, oneJpg)+'\n')
+                    count += 1
 
-        for oneJpg in os.listdir(self.samplesRootPath+folder):
-            if oneJpg.endswith('.'+self.imageFormat):
-                f.write(os.path.join(self.samplesRootPath, folder, oneJpg)+'\n')
-                count += 1
-
-        print('Images found in ', folder, ': ', count)
-        f.close()
+        print(' Images found in ', source_folder, ': ', count,' of type: '+self.imageFormat)
+        return result_dat_path
 
     def run_merge_vec(self):
         if not os.path.exists(os.path.join(self.workDir, 'mergevec.py')):

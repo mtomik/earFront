@@ -2,11 +2,13 @@ from django.shortcuts import render
 from django.contrib import messages
 
 from earDetectionWebApp.settings import BASE_DIR
-from earDetector.earDetect import earDetect
+from earDetector.earDetect import earDetect,earDetectParams
 from earDetector.forms import PhotoUpload
 
 from skimage import  io, filters
 from django.contrib.auth.decorators import login_required
+from earDetectionWebApp.settings import properties
+from earDetector.multithread import create_async_multi_detect
 
 import io
 import glob
@@ -27,21 +29,21 @@ def detect(request):
             image = request.FILES['image']
             data = image.read()
             image.close()
-            xml = form.clean_field('xml')
+            xml_left = form.clean_field('xml_left')
+            xml_right = form.clean_field('xml_right')
+
             ellipse_find = form.clean_field('ellipse_find')
             do_rotation = form.clean_field('do_rotation')
             rotation = form.clean_field('rotation')
 
-            detector = earDetect(xml)
-            (images_url,a) = detector.detect_from_bytes(data, image.name, ellipse=ellipse_find, rotation=(do_rotation, rotation))
+            params = earDetectParams(data,image.name,ellipse=ellipse_find,rotation=(do_rotation,rotation))
+            earType,(images_url,a) = create_async_multi_detect(xml_left,xml_right,params)
 
-            print('Im;'+str(images_url))
-            print('A:'+str(a))
 
             if not images_url:
                 messages.warning(request,"Ziadne ucho nebolo najdene!", fail_silently=True)
             else:
-                messages.success(request, "Ucho bolo najdene! Rotacia: "+str(a) + "°",fail_silently=True)
+                messages.success(request, str(earType).capitalize()+" ucho bolo najdene! Rotacia: "+str(a) + "°",fail_silently=True)
 
             return render(request, 'earDetect.html', {'images': images_url,
                                                       'xmls': get_all_xmls()})
@@ -80,8 +82,20 @@ def detectSciKit(request):
         return None
 
 def get_all_xmls():
-    all_xmls = glob.glob(BASE_DIR + '/earDetector/xml/*.xml')
-    xmls = list()
-    for one_xml in all_xmls:
-        xmls.append((os.path.basename(one_xml), one_xml))
+    # all_xmls = glob.glob(BASE_DIR + '/earDetector/xml/*.xml')
+    # xmls = list()
+    # for one_xml in all_xmls:
+    #     xmls.append((os.path.basename(one_xml), one_xml))
+
+    xmls = get_files(os.path.join(properties.get('testerdir'),'xmls/'),'.xml')
     return xmls
+
+
+def get_files(path,type):
+    all_files = glob.glob(path+'*'+type)
+    files = list()
+    for one in all_files:
+        if os.path.isfile(one) and os.path.splitext(one)[1] == type:
+            files.append(os.path.basename(one))
+
+    return files
