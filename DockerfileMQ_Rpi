@@ -1,0 +1,3 @@
+FROM fpommerening/rpi-rabbitmq
+
+RUN rabbitmq-plugins enable rabbitmq_management
