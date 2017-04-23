@@ -75,8 +75,13 @@ RUN cd /usr/local/lib/python3.4/dist-packages/ && mv cv2.cpython-34m.so cv2.so
 
 COPY *.txt /
 
+# make python3 default
+RUN alias python=python3 && alias pip=pip3
+
 # install dependencies
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
+
+
 
 # copy Django project
 RUN mkdir /code
