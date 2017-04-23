@@ -79,7 +79,7 @@ COPY *.txt /
 RUN alias python=python3 && alias pip=pip3
 
 # install dependencies
-RUN pip install -r requirements.txt
+RUN pip install -r requirements-rpi.txt
 
 
 
