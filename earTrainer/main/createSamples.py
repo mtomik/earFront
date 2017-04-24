@@ -88,7 +88,7 @@ class CreateSamples:
         images_path = os.path.join(self.samplesRootPath,source_folder)
         print('ImagesPath '+images_path)
         if isnegative:
-            result_dat_path = os.path.join(self.workDir,'negative.dat')
+            result_dat_path = os.path.join(self.workDir,'negatives.dat')
         else:
             result_dat_path = os.path.join(self.resultDir,'positive.dat')
 
