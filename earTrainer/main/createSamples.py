@@ -110,7 +110,7 @@ class CreateSamples:
         if not os.path.exists(os.path.join(self.workDir, 'mergevec.py')):
             copyfile(BASE_DIR+'/earTrainer/scripts/mergevec.py', self.workDir+'mergevec.py')
 
-        return_code = Utils.run_command('python mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
+        return_code = Utils.run_command('python3 mergevec.py -v '+self.resultDir+' -o '+self.resultDir+'/merged.vec', self.workDir)
         #os.chdir('../scripts')
         #os.system('mergevec.py -v '+self.resultDir+' -o merged.vec')
 
