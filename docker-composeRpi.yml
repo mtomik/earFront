@@ -4,7 +4,7 @@ services:
 
   # Postgres ( db for Django )
   db:
-    image: postgres:latest
+    image: randyp/rpi-postgres
     hostname: db
     environment:
       - POSTGRES_USER=postgres
@@ -15,7 +15,7 @@ services:
 
   # Redis
   redis:
-    image: redis:2.8.19
+    image: w1mvy/raspberry-redis
     hostname: redis
 
 
@@ -24,7 +24,7 @@ services:
     hostname: rabbit
     build:
       context: .
-      dockerfile: DockerfileMQ
+      dockerfile: DockerfileMQ_Rpi
     environment:
       - RABBITMQ_DEFAULT_USER=admin
       - RABBITMQ_DEFAULT_PASS=mypass
@@ -36,11 +36,13 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: DockerfileRpiNoConda
     hostname: web
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
       - PYTHONUNBUFFERED=true
+    volumes:
+      - /home/pi/web/data:/ear_detection
     command: ./run_web.sh
     ports:
       - "8000:8000"
@@ -55,7 +57,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: DockerfileRpiNoConda
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
