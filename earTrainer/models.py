@@ -70,6 +70,7 @@ class TrainerModel(models.Model):
     featureType = models.CharField(max_length=10, default='LBP')
     mode = models.CharField(default='ALL', max_length=10)
 
+    full_cmd = models.CharField(max_length=500, default='')
     status = models.CharField(max_length=50, default='NEW')
 
     def __str__(self):

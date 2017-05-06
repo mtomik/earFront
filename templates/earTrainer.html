@@ -107,15 +107,6 @@
                                         <input type="text" name="name" class="form-control" id="name">
                                     </div>
                                     <div class="form-group">
-                                        <label for="training_type" class="form-control-label">bt</label>
-                                        <select class="form-control" id="training_type" name="training_type">
-                                            <option value="RAB" selected>RAB</option>
-                                            <option value="LB">LB</option>
-                                            <option value="GAB">GAB</option>
-                                            <option value="DAB">DAB</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
                                         <label for="samplesId" class="form-control-label">Pozitivne
                                             snimky:</label>
                                         <select class="form-control" id="samplesId" name="samplesId">
@@ -123,6 +114,13 @@
                                                 <option value="{{ sample.pk }}">{{ sample.name }}</option>
                                             {% endfor %}
 
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="featureType" class="form-control-label">featureType</label>
+                                        <select class="form-control" id="featureType" name="featureType">
+                                            <option value="LBP" selected>LBP</option>
+                                            <option value="HAAR">HAAR</option>
                                         </select>
                                     </div>
                                     <div class="form-group">
@@ -182,13 +180,7 @@
                                         <label for="maxWeakCount" class="form-control-label">maxWeakCount</label>
                                         <input type="text" name="maxWeakCount" class="form-control" id="maxWeakCount">
                                     </div>
-                                    <div class="form-group">
-                                        <label for="featureType" class="form-control-label">featureType</label>
-                                        <select class="form-control" id="featureType" name="featureType">
-                                            <option value="LBP" selected>LBP</option>
-                                            <option value="HAAR">HAAR</option>
-                                        </select>
-                                    </div>
+
                                     <div class="form-group">
                                         <label for="mode" class="form-control-label">mode</label>
                                         <select class="form-control" id="mode" name="mode">
