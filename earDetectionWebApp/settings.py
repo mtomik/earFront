@@ -27,8 +27,8 @@ SECRET_KEY = 'j@fw^tl-_@s5@2ii6s4!^5qz^jz@#%d*h#$=75npa&1ebv1=p%'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['147.175.106.116','localhost','127.0.0.1']
-
+#ALLOWED_HOSTS = ['147.175.106.116','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
 
