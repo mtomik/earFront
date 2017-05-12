@@ -10,9 +10,6 @@ from earDetectionWebApp.settings import BASE_DIR
 
 class Utils:
 
-    def __init__(self):
-        self.x = 0
-
     @staticmethod
     def run_command(cmd, path=None):
         if path is not None:

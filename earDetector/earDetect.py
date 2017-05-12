@@ -18,12 +18,13 @@ class earDetectParams():
 
 class earDetect:
 
-    MAX_WIDTH = 300
+    MAX_WIDTH = 400
     xml_file = ''
     detector = None
 
     def __init__(self, xmlfile):
         self.detector = cv2.CascadeClassifier(os.path.join(properties.get('testerdir'),'xmls',xmlfile))
+        self.equalizer = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
 
 
     def resize(self,pil_img):
@@ -33,11 +34,25 @@ class earDetect:
         pil_img.thumbnail((self.MAX_WIDTH, hsize), Image.ANTIALIAS)
         return np.array(pil_img)
 
+
+    def detect_from_bytes(self,params:earDetectParams):
+        b_data = np.fromstring(params.data, np.uint8)
+        img = Image.open(io.BytesIO(b_data)).convert('RGB')
+
+        #np_arr = np.fromstring(image, np.uint8)
+        #img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
+        return self.detect(img,params.name,params.ellipse,params.rotation)
+
     def detect(self,img,name, ellipse=True, rotation=(True,15)):
         result_images = list()
 
+        img = self.resize(img)
+
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+        gray = self.equalizer.apply(gray)
 
         if rotation[0]:
             return self.detect_with_rotation(img, gray, result_images, ellipse, name, rotation[1])
@@ -45,56 +60,11 @@ class earDetect:
         return self.detect_sequence(img, gray, result_images, ellipse, name),0
 
 
-    def detect_from_bytes(self,params:earDetectParams):
-        b_data = np.fromstring(params.data, np.uint8)
-        img = Image.open(io.BytesIO(b_data)).convert('RGB')
-        img = self.resize(img)
-
-        #np_arr = np.fromstring(image, np.uint8)
-        #img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-        return self.detect(img,params.name,params.ellipse,params.rotation)
-        # ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
-        #                                  minSize=(1, 1), maxSize=(1000, 1000), flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
-        #
-        # if ears is not None:
-        #     print('Ear found by Cascade Detector!')
-        #     rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in ears])
-        #     pick = non_max_suppression(rects, probs=None, overlapThresh=0.65)
-        #
-        #     # draw the final bounding boxes
-        #     for (xA, yA, xB, yB) in pick:
-        #         cv2.rectangle(img, (xA, yA), (xB, yB), (0, 255, 0), 2)
-        #
-        #     print("[INFO] : {} original boxes, {} after suppression".format(
-        #         len(rects), len(pick)))
-        #
-        #     if len(pick) > 0 :
-        #         img_url = self.save_image(img,name)
-        #         result_images.append(img_url)
-        #
-        #         if ellipse:
-        #             pick = self.return_biggest(pick)
-        #             only_ear = gray[pick[1]:pick[3], pick[0]:pick[2]]
-        #             img = self.contour_match(only_ear)
-        #             img2_url = self.save_image(img,'contour.jpg')
-        #             result_images.append(img2_url)
-        #
-        #
-        #         #TODO: aplikovat background substract
-        #         return result_images
-        #     else : return None
-        #
-        #
-        #     # cv2.imshow(one, img)
-        # else:
-        #     return None
 
     def detect_sequence(self,orig,gray,result_images,ellipse,name):
-        ears = self.detector.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5,
-                                              minSize=(1, 1), maxSize=(1000, 1000),
+        ears = self.detector.detectMultiScale(gray, scaleFactor=1.2, minNeighbors=5,
+                                              minSize=(50, 50), maxSize=(1000, 1000),
                                               flags=cv2.CASCADE_FIND_BIGGEST_OBJECT)
-
         if ears is not None:
             print('Ear found by Cascade Detector!')
             rects = np.array([[x, y, x + w, y + h] for (x, y, w, h) in ears])
@@ -118,20 +88,22 @@ class earDetect:
                     img2_url = self.save_image(img,'contour.jpg')
                     result_images.append(img2_url)
 
-                    # cutting everything outside ellipse
-                    img = self.cut_only_ellipse(only_ear,ellipse_shape)
+                    # cut everything outside ellipse
+                    img = self.cut_and_rotate(only_ear,ellipse_shape)
                     img3_url = self.save_image(img,'contour_cut.jpg')
                     result_images.append(img3_url)
 
-                #TODO: aplikovat background substract
                 return result_images
         return None
 
-    def cut_only_ellipse(self,img,ellipse):
+    def cut_and_rotate(self,img, ellipse):
         mask = np.zeros_like(img)
-        cv2.ellipse(mask,ellipse,(255,255,255),-1)
-        return np.bitwise_and(img,mask)
-
+        cv2.ellipse(mask, ellipse, (255, 255, 255), -1)
+        cut = np.bitwise_and(img, mask)
+        angle = ellipse[2]
+        if angle > 50:
+            angle = 180 - angle
+        return imutils.rotate_bound(cut, angle)
 
 
 
@@ -154,31 +126,33 @@ class earDetect:
     def contour_match(self,img):
         normal = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
 
-        gray = cv2.GaussianBlur(img, (11, 11), 0)
-        gray = cv2.medianBlur(gray, 11)
+        gray = cv2.medianBlur(img, 9)
 
-        # gray = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-        #                              cv2.THRESH_BINARY, 11, 2)
-
-        gray = cv2.erode(gray, None, iterations=3)
-        gray = cv2.dilate(gray, None, iterations=4)
+        kernel = np.ones((2,2),np.uint8)
+        gray = cv2.erode(gray, kernel, iterations=4)
+        gray = cv2.dilate(gray, kernel, iterations=4)
 
         thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                   cv2.THRESH_BINARY_INV, 11, 1)
+                                   cv2.THRESH_BINARY_INV, 7, 1)
+
         kernel = np.ones((3, 3), np.uint8)
-        closing = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=4)
+        closing = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=1)
 
-        im2, cnts, hierarchy = cv2.findContours(closing,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-        biggest = None
-        biggest_area = 0
-        for one in cnts:
-            area = cv2.contourArea(one)
+        closing = cv2.dilate(closing, kernel, iterations=1)
 
-            if len(one) > 5:
-                if biggest_area < area:
-                    biggest_area = area
-                    biggest = one
+        kernel = np.ones((3, 3), np.uint8)
+        closing = cv2.morphologyEx(closing, cv2.MORPH_CLOSE, kernel, iterations=5)
 
+        im2, cnts, hierarchy = cv2.findContours(closing, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        biggest = self.get_biggest_cnt(cnts)
+        cv2.drawContours(closing, [biggest], 0, (255, 255, 255), -1)
+
+        kernel = np.ones((5, 5), np.uint8)
+        closing = cv2.morphologyEx(closing, cv2.MORPH_OPEN, kernel, iterations=4)
+
+
+        im2, cnts, hierarchy = cv2.findContours(closing,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE,offset=(2,0))
+        biggest = self.get_biggest_cnt(cnts)
         ellipse = cv2.fitEllipse(biggest)
         cv2.ellipse(normal, ellipse, (255, 0, 0), 2)
         return normal,ellipse
@@ -206,6 +180,19 @@ class earDetect:
                     return (imgs, a)
 
         return None
+
+    def get_biggest_cnt(self,cnts):
+        biggest = None
+        biggest_area = 0
+        # copy = cv2.drawContours(copy, cnts, -1,(0,255,0),3)
+        for one in cnts:
+            area = cv2.arcLength(one, True)
+
+            if len(one) > 5:
+                if biggest_area < area:
+                    biggest_area = area
+                    biggest = one
+        return biggest
 
 
 

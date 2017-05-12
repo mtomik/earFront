@@ -42,6 +42,8 @@ services:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
       - PYTHONUNBUFFERED=true
     command: ./run_web.sh
+    volumes:
+      - /media/xtomik/Zaloha/Ear_detection:/ear_detection
     ports:
       - "8000:8000"
     links:
@@ -60,7 +62,7 @@ services:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
     volumes:
-      - E:/Ear_detection:/ear_detection
+      - /media/xtomik/Zaloha/Ear_detection:/ear_detection
     ports:
       - "5555:5555"
     links:

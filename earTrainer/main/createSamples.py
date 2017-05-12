@@ -40,21 +40,18 @@ class CreateSamples:
 
     def start(self):
 
-        print('Creating positives.dat')
+        # Vytvorenie deskriptora ( zoznam cies ku vsetkym snimkom )
         self.positivesDat = self.create_positive_dat()
-
-        print('Creating negatives.dat')
         self.negativesDat = self.create_negative_dat()
 
-        print(str(self.negativesDat)+' '+str(self.positivesDat))
+        # ulozenie stavu procesu do DB
         self.samplesModel.status = 'RUNNING'
         self.samplesModel.save()
 
-
-        # run positive sample creator
+        # vytvorenie pozitivnych VEC suborov
         self.create_pos_samples()
 
-        # merge created positive samples to single VEC
+        # Spojenie vsetkych VEC do jedneho
         return self.run_merge_vec()
 
     def test(self):
@@ -88,7 +85,7 @@ class CreateSamples:
         images_path = os.path.join(self.samplesRootPath,source_folder)
         print('ImagesPath '+images_path)
         if isnegative:
-            result_dat_path = os.path.join(self.workDir,'negative.dat')
+            result_dat_path = os.path.join(self.workDir,'negatives.dat')
         else:
             result_dat_path = os.path.join(self.resultDir,'positive.dat')
 
