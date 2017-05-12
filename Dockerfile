@@ -2,6 +2,7 @@
 FROM continuumio/miniconda3
 
 MAINTAINER Martin Tomik <mtomik@live.com>
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y --fix-missing libgtk2.0-dev libpq-dev
@@ -12,10 +13,10 @@ RUN conda update -y --all && \
 
 ENV PATH $CONDA_DIR/bin:$PATH
 
-RUN /bin/bash -c "source activate work && \
+RUN source activate work && \
     conda install -y --file conda-requirements.txt && \
     conda install -y -c menpo opencv3=3.2.0 && \
-    pip install  -r requirements.txt"
+    pip install  -r requirements.txt
 
 ENV PATH /opt/conda/envs/work/bin:$PATH
 
