@@ -13,41 +13,30 @@ def add(x,y):
 
 @app.task(bind = True)
 def create_samples(self,samplesId):
-
-    # global POSITIVES_COUNT
-    # POSITIVES_COUNT = samples.pos_samples
     samples = SamplesModel.objects.get(pk=samplesId)
     assert samples is not None
-
-    print('in async: ',samples)
 
     self.update_state(state="PROGRESS", meta={'progress': 10})
     sample_creator = CreateSamples(samples.name,samples)
     self.update_state(state="PROGRESS", meta={'progress': 20})
     return_code = sample_creator.start()
-
     self.update_state(state="PROGRESS", meta={'progress': 100})
 
     if return_code is 0:
         samples.status = "FINISHED"
     else:
         samples.status = "FAILED"
-
     samples.save()
-
     return 'Samples: {0}'.format(samples.positives)
 
 @app.task(bind = True)
 def start_training(self, trainerId):
     trainerModel = TrainerModel.objects.get(pk=trainerId)
+    assert trainerModel is not None
     positives = trainerModel.positives.positives
-    print('POS: ',positives)
-
-    # only 80% of positive samples
     positive_cut = int(positives * 0.8)
     trainerModel.positives.positives = positive_cut
     trainerModel.save()
-
     t = Trainer(trainerModel)
     self.update_state(state="PROGRESS", meta={'progress': 10})
     return_code = t.start()
@@ -59,19 +48,16 @@ def start_training(self, trainerId):
         trainerModel.status = 'FAILED'
 
     trainerModel.save()
-
     return 'Finished!'
 
 
 @app.task(bind = True)
 def start_testing(self, testingModelPk):
     testingModel = TesterModel.objects.get(pk=testingModelPk)
+    assert testingModel is not None
     xml_path = testingModel.trainer.result_xml_path
     dir = testingModel.samples
     descriptor = testingModel.descriptor
-
-    # copy from trainer result to test result dir
-
     print('Running tester for xml file ',xml_path)
     test = Tester(xml_ear_file=xml_path, trainer_name=testingModel.trainer.name, samples_dir=dir, descriptor_name=descriptor)
     try:
@@ -83,7 +69,6 @@ def start_testing(self, testingModelPk):
         testingModel.status = 'ERROR'
         testingModel.save()
         raise FileNotFoundError(err)
-
     testingModel.save()
     return result
 

@@ -11,7 +11,7 @@ class thread_detector(threading.Thread):
         threading.Thread.__init__(self,daemon=True)
         self.type = type
         self.q = q
-        self.detect = earDetect(xml_file)
+        self.detect = earDetect(xml_file, type)
         self.params = params
 
 

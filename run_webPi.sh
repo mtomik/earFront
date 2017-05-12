@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/sh
 
 # wait for PSQL server to start
 sleep 10
 
-#source activate work
+source activate work
 
 # migrate db, so we have the latest db schema
 python3 manage.py makemigrations && python3 manage.py migrate

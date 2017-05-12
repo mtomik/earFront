@@ -8,9 +8,16 @@ RUN apt-get update && apt-get -y upgrade && \
 
 COPY *.txt /
 RUN conda update -y --all && \
+    conda create -y --name work python=3.5
+
+ENV PATH $CONDA_DIR/bin:$PATH
+
+RUN /bin/bash -c "source activate work && \
     conda install -y --file conda-requirements.txt && \
-    ##conda install -y -c menpo opencv3=3.2.0 && \
-    pip install  -r requirements.txt
+    conda install -y -c menpo opencv3=3.2.0 && \
+    pip install  -r requirements.txt"
+
+ENV PATH /opt/conda/envs/work/bin:$PATH
 
 # copy Django project
 RUN mkdir /code
@@ -19,5 +26,3 @@ COPY . .
 RUN chmod +x run_web.sh
 
 RUN adduser --disabled-password --gecos '' myuser
-#EXPOSE 8000
-#CMD ["python","manage.py","runserver","0.0.0.0:8000"]

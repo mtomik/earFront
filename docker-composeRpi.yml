@@ -36,14 +36,14 @@ services:
   web:
     build:
       context: .
-      dockerfile: DockerfileRpiNoConda
+      dockerfile: DockerfileRpi
     hostname: web
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
       - PYTHONUNBUFFERED=true
     volumes:
       - /home/pi/web/data:/ear_detection
-    command: ./run_web.sh
+    command: ./run_webPi.sh
     ports:
       - "8000:8000"
     links:
@@ -57,7 +57,7 @@ services:
   worker:
     build:
       context: .
-      dockerfile: DockerfileRpiNoConda
+      dockerfile: DockerfileRpi
     environment:
       - PATH=/opt/conda/bin:/usr/bin:$PATH
     command: ./run_celery.sh
