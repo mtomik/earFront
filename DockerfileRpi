@@ -81,14 +81,17 @@ RUN alias python=python3 && alias pip=pip3
 # install dependencies
 RUN pip3 install -r requirements-rpi.txt
 
-
-
 # copy Django project
 RUN mkdir /code
 WORKDIR /code
 COPY . .
 RUN chmod +x run_celeryPi.sh run_webPi.sh
 
-RUN adduser --disabled-password --gecos '' myuser
-#EXPOSE 8000
-#CMD ["python","manage.py","runserver","0.0.0.0:8000"]
+RUN addgroup celery
+
+RUN adduser --disabled-password  --no-create-home --system -q --ingroup celery celery
+
+RUN mkdir /var/log/app/ -p
+RUN chown -R celery:celery /var/log/
+ADD supervisord.conf /etc/supervisor/conf.d/
+RUN chown -R celery:celery /etc/supervisor/conf.d/supervisord.conf
