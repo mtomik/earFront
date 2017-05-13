@@ -26,4 +26,6 @@ WORKDIR /code
 COPY . .
 RUN chmod +x run_web.sh
 
-RUN adduser --disabled-password --gecos '' myuser
+RUN addgroup web
+RUN adduser --disabled-password  --no-create-home --system -q --ingroup web web
+USER web

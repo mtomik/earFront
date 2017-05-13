@@ -7,16 +7,16 @@
             <div class="jumbotron">
                 <h1>Trenovanie klasifikatora</h1>
 
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#samples">Vytvorit
+                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#samples">Vytvoriť
                     vzorky
                 </button>
-                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#trainer">Spustit
-                    trenovanie
+                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#trainer">Spustiť
+                    trénovanie
                 </button>
                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#tester">Otestuj
                 </button>
                 <button type="button" class="btn btn-warning btn-lg" data-toggle="modal"
-                        onclick="location.href='{% url "results" %}'">Vysledky
+                        onclick="location.href='{% url "results" %}'">Výsledky
                 </button>
 
                 <!-- Modal -->
@@ -28,7 +28,7 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                    <h4 class="modal-title">Vytvorit pozitivne vzorky</h4>
+                                    <h4 class="modal-title">Vytvoriť pozitívne vzorky</h4>
                                 </div>
                                 <div class="modal-body">
                                     {% csrf_token %}
@@ -37,7 +37,7 @@
                                         <input type="text" name="name" class="form-control" id="name">
                                     </div>
                                     <div class="form-group">
-                                        <label for="samples_dir" class="form-control-label">Priecinok pozitivnych
+                                        <label for="samples_dir" class="form-control-label">Priečinok pozitívnych
                                             vzoriek:</label>
                                         <select class="form-control" id="samples_dir" name="samples_dir">
                                             {% for sample in all_samples_dirs %}
@@ -47,7 +47,7 @@
                                         </select>
                                     </div>
                                     <div class="form-group">
-                                        <label for="positive_samples" class="form-control-label">Pocet pozitivnych
+                                        <label for="positive_samples" class="form-control-label">Počet pozitívnych
                                             vzoriek:</label>
                                         <input type="text" name="positive_samples" class="form-control"
                                                id="positive_samples">
@@ -70,18 +70,18 @@
                                         <input type="text" name="max_dev" class="form-control" id="max_dev">
                                     </div>
                                     <div class="form-group">
-                                        <label for="w" class="form-control-label">Sirka snimok (default 20)</label>
+                                        <label for="w" class="form-control-label">Šírka snímok (default 20)</label>
                                         <input type="text" name="w" class="form-control" id="w">
                                     </div>
                                     <div class="form-group">
-                                        <label for="h" class="form-control-label">Vyska snimok (default 40)</label>
+                                        <label for="h" class="form-control-label">Výška snímok (default 40)</label>
                                         <input type="text" name="h" class="form-control" id="h">
                                     </div>
 
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavriet</button>
-                                    <button type="submit" class="btn btn-primary">Start</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Zavrieť</button>
+                                    <button type="submit" class="btn btn-primary">Štart</button>
                                 </div>
                             </div>
                         </form>
