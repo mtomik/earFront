@@ -87,7 +87,7 @@ RUN pip3 install -r requirements-rpi.txt
 RUN mkdir /code
 WORKDIR /code
 COPY . .
-RUN chmod +x run_celery.sh run_web.sh
+RUN chmod +x run_celeryPi.sh run_webPi.sh
 
 RUN adduser --disabled-password --gecos '' myuser
 #EXPOSE 8000

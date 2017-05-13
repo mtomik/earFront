@@ -6,14 +6,14 @@
 
         <div class="row">
             <div class="jumbotron">
-                <h1>Pozitivne vzorky</h1>
+                <h1>Pozitívne vzorky</h1>
                 <div class="table-responsive">
                     <table class="table">
                         <tr>
-                            <th>Nazov</th>
-                            <th>Zdrojovy priecinok</th>
-                            <th>positives</th>
-                            <th>status</th>
+                            <th>Názov</th>
+                            <th>Zdrojový priečinok</th>
+                            <th>Počet</th>
+                            <th>Status</th>
                         </tr>
                         {% for sample in all_samples %}
                             <tr>
@@ -30,15 +30,15 @@
 
         <div class="row">
             <div class="jumbotron">
-                <h1>XML trening</h1>
+                <h1>XML tréning</h1>
                 <div class="table-responsive">
                     <table class="table">
                         <tr>
-                            <th>Nazov</th>
-                            <th>cest k xml</th>
-                            <th>pozitivne</th>
-                            <th>negativne</th>
-                            <th>status</th>
+                            <th>Názov</th>
+                            <th>Cest k xml</th>
+                            <th>Pozitívne</th>
+                            <th>Negatívne</th>
+                            <th>Status</th>
                         </tr>
                         {% for train in all_trainers %}
                             <tr>
@@ -62,10 +62,10 @@
                     <table class="table">
                         <tr>
                             <th>Meno</th>
-                            <th>Priecinok vzoriek</th>
+                            <th>Priečinok vzoriek</th>
                             <th>Deskriptor</th>
-                            <th>Nazov trenera</th>
-                            <th>Vysledok</th>
+                            <th>Názov trénera</th>
+                            <th>Výsledok</th>
                             <th>Status</th>
                         </tr>
                         {% for test in all_results %}
