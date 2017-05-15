@@ -9,7 +9,7 @@ ENV PATH /usr/local/bin:$PATH
 
 RUN apt-get update && apt-get -y upgrade && \
     apt-get install -y libgtk2.0-dev build-essential cmake cmake-curses-gui pkg-config \
-    libatlas-base-dev gfortran \
+    libatlas-base-dev gfortran supervisor \
     libjpeg-dev libjasper-dev libpng12-dev \
     libpng3 libpnglite-dev zlib1g-dbg zlib1g zlib1g-dev \
     libunicap2 libunicap2-dev swig libv4l-0 libv4l-dev \
