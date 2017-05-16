@@ -28,4 +28,6 @@ RUN chmod +x run_web.sh
 
 RUN addgroup web
 RUN adduser --disabled-password  --no-create-home --system -q --ingroup web web
+RUN chown -R web:web /code
+
 USER web

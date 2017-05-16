@@ -34,5 +34,3 @@ RUN mkdir /var/log/app/ -p
 RUN chown -R celery:celery /var/log/
 ADD supervisord.conf /etc/supervisor/conf.d/
 RUN chown -R celery:celery /etc/supervisor/conf.d/supervisord.conf
-
-#RUN /bin/bash -c "source activate work && celery worker -A earDetectionWebApp -Q default -n default@%h"
