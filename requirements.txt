@@ -21,7 +21,7 @@ numpy==1.11.3
 olefile==0.44
 opencv-python==3.2.0.7
 Pillow==4.1.1
-psycopg2==2.7.1
+psycopg2-binary
 pyparsing==2.1.4
 python-dateutil==2.6.0
 pytz==2017.2
